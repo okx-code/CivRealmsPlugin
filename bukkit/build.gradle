@@ -1,0 +1,40 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '2.0.4'
+}
+
+project.ext.pluginName = "${rootProject.name}-Bukkit"
+tasks.jar.enabled = false
+
+dependencies {
+    implementation project(':common')
+    implementation 'com.zaxxer:HikariCP:3.4.3'
+    compileOnly 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
+//    compileOnly 'net.minelink:CombatTagPlus:1.3.2-SNAPSHOT'
+}
+
+processResources {
+    inputs.property 'version', project.version
+    expand(version: version, name: project.ext.pluginName)
+}
+
+shadowJar {
+    archiveFileName = "${project.ext.pluginName}-${project.version}.jar"
+}
+
+artifacts {
+    archives shadowJar
+}
+
+task cleanJar(type: Delete) {
+    delete fileTree('../dist') {
+        include "${project.ext.pluginName}-*.jar"
+    }
+}
+
+task copyJar(type: Copy) {
+    from shadowJar
+    into '../dist'
+}
+
+build.dependsOn copyJar
+copyJar.dependsOn cleanJar

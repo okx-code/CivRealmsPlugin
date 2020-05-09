@@ -1,0 +1,4 @@
+name: ${name}
+version: ${version}
+main: com.civrealms.plugin.bungee.CivRealmsBungeePlugin
+author: Okx

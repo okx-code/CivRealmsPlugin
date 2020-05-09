@@ -1,0 +1,16 @@
+subprojects {
+    apply plugin: 'java'
+
+    group = 'com.civrealms.plugin'
+    version = '1.0.1'
+
+    repositories {
+        mavenCentral()
+        maven {
+            url 'https://hub.spigotmc.org/nexus/content/groups/public/'
+        }
+        maven {
+            url 'https://build.devotedmc.com/plugin/repository/everything/'
+        }
+    }
+}

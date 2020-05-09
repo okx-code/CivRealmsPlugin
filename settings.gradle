@@ -1,0 +1,6 @@
+rootProject.name = 'CivRealmsPlugin'
+include (
+        'common',
+        'bungee',
+        'bukkit'
+)
