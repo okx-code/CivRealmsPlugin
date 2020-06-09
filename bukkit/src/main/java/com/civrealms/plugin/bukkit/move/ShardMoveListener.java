@@ -1,9 +1,11 @@
 package com.civrealms.plugin.bukkit.move;
 
+import com.civrealms.plugin.bukkit.shard.JoinShardManager;
 import com.civrealms.plugin.bukkit.shard.LeaveShardManager;
 import com.civrealms.plugin.bukkit.shard.ShardManager;
 import com.civrealms.plugin.common.packets.PacketPlayerInfo.TeleportCause;
 import com.civrealms.plugin.common.packets.data.BoatData;
+import com.civrealms.plugin.common.shard.AquaNether;
 import java.util.List;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -23,11 +25,13 @@ public class ShardMoveListener implements Listener {
   private final Plugin plugin;
   private final ShardManager manager;
   private final LeaveShardManager leaveShard;
+  private final JoinShardManager joinShardManager;
 
-  public ShardMoveListener(Plugin plugin, ShardManager manager, LeaveShardManager leaveShard) {
+  public ShardMoveListener(Plugin plugin, ShardManager manager, LeaveShardManager leaveShard, JoinShardManager joinShardManager) {
     this.plugin = plugin;
     this.manager = manager;
     this.leaveShard = leaveShard;
+    this.joinShardManager = joinShardManager;
   }
 
   @EventHandler
@@ -36,7 +40,13 @@ public class ShardMoveListener implements Listener {
     if (!isCrossChunk(event.getFrom(), event.getTo())
         || manager == null
         || manager.getShards() == null
-        || leaveShard.isLeaving(player)) {
+        || leaveShard.isLeaving(player)
+        || joinShardManager.isJoining(player.getUniqueId())) {
+      return;
+    }
+    AquaNether aquaNether = manager.getAquaNether();
+    if (aquaNether != null && !aquaNether.isTop()) {
+      // don't try and teleport people in the aqua nether
       return;
     }
 

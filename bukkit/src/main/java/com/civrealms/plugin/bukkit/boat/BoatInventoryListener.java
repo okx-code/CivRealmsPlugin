@@ -38,6 +38,8 @@ public class BoatInventoryListener implements Listener {
       return;
     }
     // TODO BETTER DETECTION
+    // this detection actually sucks
+    // i just copied it from the old plugin
     Material boatOn = e.getTo().getBlock().getType();
     if (boatOn != Material.STATIONARY_WATER && boatOn != Material.WATER && boatOn != Material.AIR) {
       Boat boat = (Boat) e.getVehicle();

@@ -1,5 +1,7 @@
 package com.civrealms.plugin.bukkit.move;
 
+import com.civrealms.plugin.bukkit.shard.JoinShardManager;
+import com.civrealms.plugin.bukkit.shard.LeaveShardManager;
 import com.civrealms.plugin.bukkit.shard.ShardManager;
 import com.civrealms.plugin.common.packets.PacketPlayerInfo.TeleportCause;
 import com.civrealms.plugin.common.shard.AquaNether;
@@ -12,14 +14,24 @@ import org.bukkit.event.player.PlayerMoveEvent;
 public class AquaNetherMoveListener implements Listener {
 
   private final ShardManager shardManager;
+  private final LeaveShardManager leaveShard;
+  private final JoinShardManager joinShardManager;
 
-  public AquaNetherMoveListener(ShardManager shardManager) {
+  public AquaNetherMoveListener(ShardManager shardManager, LeaveShardManager leaveShard, JoinShardManager joinShardManager) {
     this.shardManager = shardManager;
+    this.leaveShard = leaveShard;
+    this.joinShardManager = joinShardManager;
   }
 
   @EventHandler
   public void on(PlayerMoveEvent event) {
     if (!isDifferentY(event.getFrom(), event.getTo())) {
+      return;
+    }
+    if (leaveShard.isLeaving(event.getPlayer())) {
+      return;
+    }
+    if (joinShardManager.isJoining(event.getPlayer().getUniqueId())) {
       return;
     }
     AquaNether nether = shardManager.getAquaNether();

@@ -20,6 +20,7 @@ public class BukkitMessenger implements BungeeMessenger, DataSender {
   public void connect(Player player, String server) {
     DataOutputStream out = new DataOutputStream();
     out.writeUTF("Connect");
+    System.out.println("CONN >> " + player.getName() + " to '" + server + "'");
     out.writeUTF(server);
 
     player.sendPluginMessage(plugin, "BungeeCord", out.toByteArray());
@@ -27,9 +28,7 @@ public class BukkitMessenger implements BungeeMessenger, DataSender {
 
   @Override
   public void send(String destination, byte[] bytes) {
-    DataOutputStream out = new DataOutputStream();
-    out.write(bytes);
-    sendPluginMessage("BungeeCord", wrapForward(destination, "CR_DATA", out).toByteArray());
+    sendPluginMessage("BungeeCord", wrapForward(destination, "CR_DATA", bytes).toByteArray());
   }
 
   @Override
@@ -37,15 +36,17 @@ public class BukkitMessenger implements BungeeMessenger, DataSender {
     sendPluginMessage("CR_DATA", data);
   }
 
-  private DataOutputStream wrapForward(String server, String subchannel, DataOutputStream data) {
+  private DataOutputStream wrapForward(String server, String subchannel, byte[] data) {
     DataOutputStream out = new DataOutputStream();
     out.writeUTF("Forward");
-    out.writeUTF(server);
-    out.writeUTF(subchannel);
+    System.out.println("FORWARD >> server = " + server  + " >> channel = " + subchannel);
+//    out.writeUTF(server);
+//    out.writeUTF(subchannel);
+    out.writeUTF("server1");
+    out.writeUTF("death");
 
-    byte[] bytes = data.toByteArray();
-    out.writeShort(bytes.length);
-    out.write(bytes);
+    out.writeShort(data.length);
+    out.write(data);
 
     return out;
   }

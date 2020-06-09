@@ -81,7 +81,6 @@ public class PacketPlayerInfo implements Packet {
     }
 
     out.writeUUID(uuid);
-    System.out.println("WRITING " + uuid + ">> BOAT "+ boat);
     out.writeByteArray(inventorySerial);
     out.writeDouble(x);
     out.writeDouble(y);
@@ -96,11 +95,13 @@ public class PacketPlayerInfo implements Packet {
     out.writeFloat(saturation);
     out.writeInt(food);
     out.writeInt(hotbar);
+    System.out.println("WRITING " + uuid + " >> BOAT " + boat + " >> CAUSE " + cause);
   }
 
   public enum TeleportCause {
     TRANSITIVE,
     TO_AN,
-    FROM_AN
+    FROM_AN,
+    DEATH
   }
 }

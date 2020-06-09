@@ -34,6 +34,6 @@ public class BungeePacketManager extends PacketManager {
     String from = in.readUTF();
 
     Packet packet = deserializePacket(in.readByteArray());
-    bus.post(PacketReceiveEvent.receivedFromServer(from, packet));
+    bus.post(PacketReceiveEvent.receivedFromBukkit(from, packet));
   }
 }

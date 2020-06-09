@@ -3,6 +3,7 @@ package com.civrealms.plugin.bukkit.message;
 import com.civrealms.plugin.common.packet.DataReceiver;
 import com.civrealms.plugin.common.packets.stream.DataInputStream;
 import com.google.common.io.ByteArrayDataInput;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 
@@ -15,6 +16,8 @@ public class BukkitMessageListener implements PluginMessageListener {
 
   @Override
   public void onPluginMessageReceived(String channel, Player player, byte[] message) {
+    System.out.println("msg received on " + channel + ": " + new String(message));
+    Bukkit.broadcastMessage("Received on "+ channel);
     if (channel.equals("BungeeCord")) {
       recieveForwardedMessage(message);
     } else if (channel.equals("CR_DATA")) {
@@ -25,7 +28,8 @@ public class BukkitMessageListener implements PluginMessageListener {
   private void recieveForwardedMessage(byte[] data) {
     DataInputStream in = new DataInputStream(data);
     String subchannel = in.readUTF();
-    if (subchannel.equals("CR_DATA")) {
+    Bukkit.broadcastMessage("SUBCHANNEL "+ subchannel);
+    if (subchannel.equals("CR_DATA") || subchannel.equals("death")/*todo remove*/) {
       byte[] msgin = unwrapForward(in);
 
       receiver.receivePacket(msgin);

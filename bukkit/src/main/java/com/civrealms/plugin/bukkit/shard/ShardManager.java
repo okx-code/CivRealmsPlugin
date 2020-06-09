@@ -13,6 +13,7 @@ import com.civrealms.plugin.common.shard.Shard;
 import com.google.common.eventbus.Subscribe;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -24,6 +25,7 @@ public class ShardManager {
   private final BungeeMessenger messenger;
   private final PacketSender sender;
   private final LeaveShardManager leaveShardManager;
+  private boolean shardInfo = false;
   private String transitiveShard;
   private AquaNether aquaNether;
   private Collection<Shard> shards;
@@ -37,26 +39,38 @@ public class ShardManager {
     this.leaveShardManager = leaveShardManager;
   }
 
-  public void sendIdentify() {
-    System.out.println("IDENTIFYING TO PROXY AS >> " + currentShard);
-    sender.sendProxy(new PacketRequestShards(currentShard));
+  public void sendIdentify(boolean onJoin) {
+    // don't send the identify packet when a player joins if we already have the shard info
+    if (!hasShardInfo() || !onJoin) {
+      System.out.println("IDENTIFYING TO PROXY AS >> " + currentShard);
+      sender.sendProxy(new PacketRequestShards(currentShard));
+    }
   }
 
   private void readShards(PacketShardInfo packet) {
     this.transitiveShard = packet.getTransitiveShard();
     this.aquaNether = packet.getAquaNether();
     this.shards = new HashSet<>(packet.getShards());
+    this.shardInfo = true;
   }
 
   public void sendPlayer(Player player, PacketPlayerInfo.TeleportCause cause, BoatData boat, String server) {
+    Objects.requireNonNull(player);
+    Objects.requireNonNull(cause);
+    Objects.requireNonNull(server);
+
     leaveShardManager.setLeaving(player);
 
     // Send to proxy to store so it can do something later
     // we can't send a message directly to the other server because
     // of the risk that it won't have any players online -
     // servers with no players cannot send nor receive plugin messages
+    // ^ THIS IS WRONG BUNGEE IS CLEVER IT USES A QUEUE
+    // IGNORE THAT GUY WE'RE SENDING IT STRAIGHT TO THE OTHER SERVER!
+
     Location loc = player.getLocation();
-    sender.sendProxy(new PacketPlayerInfo(
+    System.out.println("OUT LOC >" + loc);
+    sender.send(server, new PacketPlayerInfo(
         cause,
         boat,
         player.getUniqueId(),
@@ -127,5 +141,9 @@ public class ShardManager {
     } else {
       return destShard.getServer();
     }
+  }
+
+  public boolean hasShardInfo() {
+    return shardInfo;
   }
 }

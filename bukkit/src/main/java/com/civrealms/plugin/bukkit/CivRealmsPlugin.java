@@ -9,8 +9,12 @@ import com.civrealms.plugin.bukkit.message.BukkitMessenger;
 import com.civrealms.plugin.bukkit.move.AquaNetherMoveListener;
 import com.civrealms.plugin.bukkit.move.PacketPlayerInfoListener;
 import com.civrealms.plugin.bukkit.move.ShardMoveListener;
+import com.civrealms.plugin.bukkit.move.VoidDamageListener;
 import com.civrealms.plugin.bukkit.packet.BukkitPacketManager;
+import com.civrealms.plugin.bukkit.respawn.DummyRandomSpawn;
+import com.civrealms.plugin.bukkit.respawn.PlayerRespawnListener;
 import com.civrealms.plugin.bukkit.shard.JoinListener;
+import com.civrealms.plugin.bukkit.shard.JoinShardManager;
 import com.civrealms.plugin.bukkit.shard.LeaveShardManager;
 import com.civrealms.plugin.bukkit.shard.ShardIdentifyScheduler;
 import com.civrealms.plugin.bukkit.shard.ShardManager;
@@ -43,26 +47,34 @@ public class CivRealmsPlugin extends JavaPlugin {
     LeaveShardManager leaveShard = new LeaveShardManager();
 
     BukkitMessageListener messageListener = new BukkitMessageListener(packetManager);
-    org.bukkit.plugin.messaging.Messenger messenger = this.getServer().getMessenger();
-    messenger.registerIncomingPluginChannel(this, "BungeeCord", messageListener);
-    messenger.registerIncomingPluginChannel(this, "CR_DATA", messageListener);
-    messenger.registerOutgoingPluginChannel(this, "BungeeCord");
-    messenger.registerOutgoingPluginChannel(this, "CR_DATA");
+    org.bukkit.plugin.messaging.Messenger pluginMessenger = this.getServer().getMessenger();
+    pluginMessenger.registerIncomingPluginChannel(this, "BungeeCord", messageListener);
+    pluginMessenger.registerIncomingPluginChannel(this, "CR_DATA", messageListener);
+    pluginMessenger.registerOutgoingPluginChannel(this, "BungeeCord");
+    pluginMessenger.registerOutgoingPluginChannel(this, "CR_DATA");
 
-    this.shardManager = new ShardManager(this, shard, this.messenger, packetManager, leaveShard);
+    this.shardManager = new ShardManager(this, shard, messenger, packetManager, leaveShard);
     bus.register(shardManager);
 
-    Bukkit.getScheduler().runTaskTimer(this, new ShardIdentifyScheduler(shardManager, packetManager), 1, 4000);
-
-    getServer().getPluginManager().registerEvents(new ShardMoveListener(this, shardManager, leaveShard), this);
-    getServer().getPluginManager().registerEvents(new JoinListener(this, shardManager, packetManager), this);
-    getServer().getPluginManager().registerEvents(new AquaNetherMoveListener(shardManager), this);
-    getServer().getPluginManager().registerEvents(leaveShard, this);
-
     BoatInventoryDao dao = new MySqlBoatInventoryDao("localhost", 3306, "civrealms", "root", "");
+
+    JoinShardManager joinShardManager = new JoinShardManager(this, shardManager, dao, new DummyRandomSpawn());
+    bus.register(joinShardManager);
+
+    Bukkit.getScheduler().runTaskTimer(this, new ShardIdentifyScheduler(shardManager), 1, 4000);
+
+    getServer().getPluginManager().registerEvents(new ShardMoveListener(this, shardManager, leaveShard, joinShardManager), this);
+    getServer().getPluginManager().registerEvents(new JoinListener(this, shardManager, joinShardManager), this);
+    getServer().getPluginManager().registerEvents(new AquaNetherMoveListener(shardManager, leaveShard, joinShardManager), this);
+    getServer().getPluginManager().registerEvents(leaveShard, this);
+    getServer().getPluginManager().registerEvents(new VoidDamageListener(), this);
+    getServer().getPluginManager().registerEvents(new PlayerRespawnListener(this, shardManager), this);
+
     getCommand("boatinventory").setExecutor(new BoatInventoryCommand(dao));
     getServer().getPluginManager().registerEvents(new BoatInventoryListener(dao), this);
 
-    bus.register(new PacketPlayerInfoListener(this, shardManager, dao));
+    bus.register(new PacketPlayerInfoListener(joinShardManager));
+
+    getServer().getPluginManager().registerEvents(new testlistener(), this);
   }
 }

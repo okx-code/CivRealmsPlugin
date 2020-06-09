@@ -3,8 +3,6 @@ package com.civrealms.plugin.bungee;
 import com.civrealms.plugin.bungee.message.ProxyMessageListener;
 import com.civrealms.plugin.bungee.packet.BungeeDataSender;
 import com.civrealms.plugin.bungee.packet.BungeePacketManager;
-import com.civrealms.plugin.bungee.playerinfo.PlayerInfoListener;
-import com.civrealms.plugin.bungee.playerinfo.PlayerInfoManager;
 import com.civrealms.plugin.bungee.shard.PacketIdentifyListener;
 import com.civrealms.plugin.bungee.shard.ShardManager;
 import com.civrealms.plugin.common.packet.PacketManager;
@@ -39,13 +37,10 @@ public class CivRealmsBungeePlugin extends Plugin {
 
     Map<String, AquaNether> aquaNetherMap = new HashMap<>();
     aquaNetherMap.put("server1", new AquaNether(true, 0, 256, "aqua"));
-//    // TODO allow aqua nether opposite server to be dynamic
     aquaNetherMap.put("aqua", new AquaNether(false, 253, 251, null));
 
     ShardManager shardManager = new ShardManager("transitive", shards, aquaNetherMap, packetManager);
     bus.register(new PacketIdentifyListener(packetManager, shardManager));
-
-    bus.register(new PlayerInfoListener(packetManager, new PlayerInfoManager()));
 
     getProxy().getPluginManager().registerListener(this, new ProxyMessageListener(destinationManager, packetManager));
 

@@ -14,7 +14,7 @@ public class PacketReceiveEvent {
     return new PacketReceiveEvent(true, null, packet);
   }
 
-  public static PacketReceiveEvent receivedFromServer(String server, Packet packet) {
+  public static PacketReceiveEvent receivedFromBukkit(String server, Packet packet) {
     return new PacketReceiveEvent(false, server, packet);
   }
 
