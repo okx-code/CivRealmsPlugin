@@ -1,9 +1,0 @@
-name: ${name}
-version: ${version}
-main: com.civrealms.plugin.bukkit.CivRealmsPlugin
-author: Okx
-
-commands:
-  boatinventory:
-    aliases: [binv, bi]
-    usage: /<command> <page>
