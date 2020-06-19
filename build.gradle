@@ -1,5 +1,6 @@
 subprojects {
     apply plugin: 'java'
+    apply plugin: 'java-library'
 
     group = 'com.civrealms.plugin'
     version = '1.0.1'

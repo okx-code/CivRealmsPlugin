@@ -3,7 +3,7 @@ package com.civrealms.plugin.bukkit.move;
 import com.civrealms.plugin.bukkit.shard.JoinShardManager;
 import com.civrealms.plugin.bukkit.shard.LeaveShardManager;
 import com.civrealms.plugin.bukkit.shard.ShardManager;
-import com.civrealms.plugin.common.packets.PacketPlayerInfo.TeleportCause;
+import com.civrealms.plugin.common.packets.PacketPlayerTransfer.TeleportCause;
 import com.civrealms.plugin.common.packets.data.BoatData;
 import com.civrealms.plugin.common.shard.AquaNether;
 import java.util.List;
@@ -77,7 +77,7 @@ public class ShardMoveListener implements Listener {
                 vehicle.getWoodType().getData());
             System.out.println(
                 "OUT >> " + passenger.getName() + ">> PASSENGER? " + isPassenger + " >> " + boat);
-            manager.sendPlayer(passenger, TeleportCause.TRANSITIVE, boat, destination);
+            manager.sendPlayer(passenger, TeleportCause.TRANSITIVE, boat, destination, adjustOceanLocation(player));
           }
         }
         vehicle.remove();
@@ -85,7 +85,14 @@ public class ShardMoveListener implements Listener {
         return;
       }
     }
-    manager.sendPlayer(player, TeleportCause.TRANSITIVE, null, destination);
+    manager.sendPlayer(player, TeleportCause.TRANSITIVE, null, destination, adjustOceanLocation(player));
+  }
+
+  private Location adjustOceanLocation(Player player) {
+    Location location = player.getLocation();
+    System.out.println(player + " - " + location + " - " + manager + " - " + manager.getAquaNether());
+    location.setY(location.getY() - manager.getAquaNether().getOceanHeight());
+    return location;
   }
 
   private boolean isCrossChunk(Location from, Location to) {

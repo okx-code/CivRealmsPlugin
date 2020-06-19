@@ -8,4 +8,5 @@ public class AquaNether {
   private final float yTeleport;
   private final float ySpawn;
   private final String oppositeServer;
+  private final int oceanHeight;
 }

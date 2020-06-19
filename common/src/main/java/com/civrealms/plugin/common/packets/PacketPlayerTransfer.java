@@ -9,17 +9,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/**
- * Sent to the proxy containing the current state of a player transferring between servers,
- * and to bukkit servers when they request a player state
- */
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class PacketPlayerInfo implements Packet {
+public class PacketPlayerTransfer implements Packet {
   private TeleportCause cause;
   private BoatData boat;
-  private UUID uuid;
+  private UUID uniqueId;
   private byte[] inventorySerial;
   private double x;
   private double y;
@@ -49,8 +45,8 @@ public class PacketPlayerInfo implements Packet {
       boat = null;
     }
 
-    uuid = in.readUUID();
-    System.out.println("FOR " + uuid + ">> BOAT " + boat);
+    uniqueId = in.readUUID();
+    System.out.println("FOR " + uniqueId + ">> BOAT " + boat);
     inventorySerial = in.readByteArray();
     x = in.readDouble();
     y = in.readDouble();
@@ -80,7 +76,7 @@ public class PacketPlayerInfo implements Packet {
       out.writeByte(boat.getSpecies());
     }
 
-    out.writeUUID(uuid);
+    out.writeUUID(uniqueId);
     out.writeByteArray(inventorySerial);
     out.writeDouble(x);
     out.writeDouble(y);
@@ -95,7 +91,7 @@ public class PacketPlayerInfo implements Packet {
     out.writeFloat(saturation);
     out.writeInt(food);
     out.writeInt(hotbar);
-    System.out.println("WRITING " + uuid + " >> BOAT " + boat + " >> CAUSE " + cause);
+    System.out.println("WRITING " + uniqueId + " >> BOAT " + boat + " >> CAUSE " + cause);
   }
 
   public enum TeleportCause {

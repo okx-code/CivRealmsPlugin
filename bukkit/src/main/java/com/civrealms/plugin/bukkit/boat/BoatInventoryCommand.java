@@ -1,5 +1,6 @@
 package com.civrealms.plugin.bukkit.boat;
 
+import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -7,6 +8,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Boat;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -23,6 +25,7 @@ public class BoatInventoryCommand implements CommandExecutor {
 
   @Override
   public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    // TODO only person in front seat can access boat
     if (!(sender instanceof Player)) {
       return false;
     }
@@ -50,6 +53,13 @@ public class BoatInventoryCommand implements CommandExecutor {
     int robotPage = page - 1;
 
     Boat boat = (Boat) player.getVehicle();
+    List<Entity> passengers = boat.getPassengers();
+    // todo passengers can't open boat inventories
+    if (passengers.size() < 1 || !passengers.get(0).equals(player)) {
+      player.sendMessage(ChatColor.RED + "Only the driver can open a boat inventory.");
+      return true;
+    }
+
     BoatInventory boatInventory = dao.getBoatInventory(boat.getUniqueId());
     boolean populate = true;
     if (boatInventory == null) {

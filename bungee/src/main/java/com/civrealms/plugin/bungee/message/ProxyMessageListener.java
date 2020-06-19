@@ -1,6 +1,5 @@
 package com.civrealms.plugin.bungee.message;
 
-import com.civrealms.plugin.bungee.DestinationManager;
 import com.civrealms.plugin.common.packet.PacketManager;
 import com.civrealms.plugin.common.packets.stream.DataInputStream;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -9,11 +8,9 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
 public class ProxyMessageListener implements Listener {
-  private final DestinationManager destinationManager;
   private final PacketManager packetManager;
 
-  public ProxyMessageListener(DestinationManager destinationManager, PacketManager packetManager) {
-    this.destinationManager = destinationManager;
+  public ProxyMessageListener(PacketManager packetManager) {
     this.packetManager = packetManager;
   }
 
@@ -31,7 +28,6 @@ public class ProxyMessageListener implements Listener {
       DataInputStream in = new DataInputStream(event.getData());
       String from = in.readUTF();
 
-      destinationManager.setServer(from, player.getServer().getInfo());
       packetManager.receivePacket(event.getData());
     }
   }

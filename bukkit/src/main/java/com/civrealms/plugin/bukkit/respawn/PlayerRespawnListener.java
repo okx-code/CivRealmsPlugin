@@ -1,28 +1,30 @@
 package com.civrealms.plugin.bukkit.respawn;
 
+import com.civrealms.plugin.bukkit.inventory.log.InventoryLogger;
 import com.civrealms.plugin.bukkit.shard.ShardManager;
-import com.civrealms.plugin.common.packets.PacketPlayerInfo.TeleportCause;
+import com.civrealms.plugin.common.packets.PacketPlayerTransfer.TeleportCause;
 import com.civrealms.plugin.common.shard.AquaNether;
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.plugin.Plugin;
 
 public class PlayerRespawnListener implements Listener {
   private final Plugin plugin;
+  private final InventoryLogger invLogger;
   private final ShardManager shardManager;
+  private final BukkitRandomSpawn randomSpawn;
 
-  public PlayerRespawnListener(Plugin plugin, ShardManager shardManager) {
+  public PlayerRespawnListener(Plugin plugin, InventoryLogger invLogger, ShardManager shardManager,
+      BukkitRandomSpawn randomSpawn) {
     this.plugin = plugin;
+    this.invLogger = invLogger;
     this.shardManager = shardManager;
+    this.randomSpawn = randomSpawn;
   }
 
   @EventHandler
@@ -32,49 +34,32 @@ public class PlayerRespawnListener implements Listener {
     }
 
     AquaNether aquaNether = shardManager.getAquaNether();
+    Player player = e.getPlayer();
+    Location location = player.getLocation();
+    String shard = shardManager.getShard(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+
     Bukkit.broadcastMessage(aquaNether.toString());
     if (aquaNether.isTop()) {
+      plugin.getLogger().info("Out die");
+      e.setRespawnLocation(randomSpawn.getRandomSpawn(e.getPlayer()));
       return;
     }
 
     plugin.getLogger().info("death");
-    ByteArrayDataOutput out1 = ByteStreams.newDataOutput();
-    out1.writeUTF("Forward");
-    out1.writeUTF("server1");
-    out1.writeUTF("CR_DATA");
-    ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
-    DataOutputStream msgout = new DataOutputStream(msgbytes);
-    try {
-      msgout.writeUTF(e.getPlayer().getDisplayName());
-      msgout.writeBoolean(true);
-    }
-    catch (IOException ex) {
-      ex.printStackTrace();
-    }
-
-    out1.writeShort(msgbytes.toByteArray().length);
-    out1.write(msgbytes.toByteArray());
-    e.getPlayer().sendPluginMessage(plugin, "BungeeCord", out1.toByteArray());
-//
-//    ByteArrayDataOutput out = ByteStreams.newDataOutput();
-//    out.writeUTF("Connect");
-//    out.writeUTF("server1");
-//    e.getPlayer().sendPluginMessage(plugin, "BungeeCord", out.toByteArray());
-//    e.getPlayer().getInventory().clear();
 
     // if you died in the aqua nether
     // spawn in the overworld
-    Player player = e.getPlayer();
-    Location location = player.getLocation();
 
-    String shard = shardManager.getShard(location.getBlockX(), location.getBlockY(), location.getBlockZ());
-    Bukkit.broadcastMessage("SENDING -> " + shard);
+    if (!shard.equals(shardManager.getCurrentShard())) {
+      shardManager.sendPlayer(player, TeleportCause.DEATH, null, shard, null);
+      // set their respawn location to where they died while we wait for bungeecord to transfer the player
+      e.setRespawnLocation(location);
+    }
+  }
 
-    Location loc = player.getLocation();
-    System.out.println("OUT LOC >" + loc);
-
-
-    shardManager.sendPlayer(player, TeleportCause.FROM_AN, null, shard);
+  @EventHandler
+  public void on(PlayerDeathEvent e) {
+    invLogger.log(e.getEntity(), "PLAYER_DEATH");
   }
 }
 /*

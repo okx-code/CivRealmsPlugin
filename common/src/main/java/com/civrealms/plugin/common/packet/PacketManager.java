@@ -1,6 +1,6 @@
 package com.civrealms.plugin.common.packet;
 
-import com.civrealms.plugin.common.packets.PacketPlayerInfo;
+import com.civrealms.plugin.common.packets.PacketPlayerTransfer;
 import com.civrealms.plugin.common.packets.PacketRequestShards;
 import com.civrealms.plugin.common.packets.PacketShardInfo;
 import com.civrealms.plugin.common.packets.stream.DataInputStream;
@@ -27,7 +27,7 @@ public abstract class PacketManager implements PacketSender, DataReceiver {
 
     addPacket(1, PacketRequestShards.class);
     addPacket(2, PacketShardInfo.class);
-    addPacket(3, PacketPlayerInfo.class);
+    addPacket(3, PacketPlayerTransfer.class);
   }
 
   private void addPacket(int id, Class<? extends Packet> clazz) {

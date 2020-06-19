@@ -18,24 +18,27 @@ public class BukkitPacketManager extends PacketManager {
   }
 
   @Override
-  public void receivePacket(byte[] data) {
+  public boolean receivePacket(byte[] data) {
     DataInputStream in = new DataInputStream(data);
 
     boolean fromProxy = in.readBoolean();
+    PacketReceiveEvent event;
     if (fromProxy) {
       Packet packet = deserializePacket(in.readByteArray());
       System.out.println("IN PROXY >> " + packet.getClass().getSimpleName());
-      bus.post(PacketReceiveEvent.receivedFromProxy(packet));
+      event = PacketReceiveEvent.receivedFromProxy(packet);
     } else {
       String from = in.readUTF();
       Packet packet = deserializePacket(in.readByteArray());
       System.out.println("IN BUKKIT >> " + packet.getClass().getSimpleName());
-      bus.post(PacketReceiveEvent.receivedFromBukkit(from, packet));
+      event = PacketReceiveEvent.receivedFromBukkit(from, packet);
     }
+    bus.post(event);
+    return event.isAcknowledged();
   }
 
   @Override
-  public void send(String destination, Packet packet) {
+  public void send(String destination, Packet packet, Runnable success, Runnable fail) {
     System.out.println("OUT BUKKIT >> " + destination + " >> " + packet.getClass().getSimpleName());
 
     DataOutputStream out = new DataOutputStream();
@@ -49,11 +52,11 @@ public class BukkitPacketManager extends PacketManager {
 
     System.out.println("OUT >>> " + out.toByteArray().length);
 
-    sender.send(destination, out.toByteArray());
+    sender.send(destination, out.toByteArray(), success, fail);
   }
 
   @Override
-  public void sendProxy(Packet packet) {
+  public void sendProxy(Packet packet, Runnable success, Runnable fail) {
     System.out.println("OUT PROXY >> " + packet.getClass().getSimpleName());
 
     DataOutputStream out = new DataOutputStream();
@@ -61,6 +64,6 @@ public class BukkitPacketManager extends PacketManager {
     out.writeUTF(server);
     out.writeByteArray(serializePacket(packet));
 
-    sender.sendProxy(out.toByteArray());
+    sender.sendProxy(out.toByteArray(), success, fail);
   }
 }

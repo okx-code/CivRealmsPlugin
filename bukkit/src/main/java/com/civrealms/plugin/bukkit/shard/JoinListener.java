@@ -1,39 +1,38 @@
 package com.civrealms.plugin.bukkit.shard;
 
-import org.bukkit.Bukkit;
+import com.civrealms.plugin.bukkit.inventory.log.InventoryLogger;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.plugin.Plugin;
 
 public class JoinListener implements Listener {
-  private final Plugin scheduler;
-  private final ShardManager shardManager;
+  private final InventoryLogger logger;
   private final JoinShardManager joinShardManager;
 
-  public JoinListener(Plugin scheduler, ShardManager shardManager,
+  public JoinListener(InventoryLogger logger,
       JoinShardManager joinShardManager) {
-    this.scheduler = scheduler;
-    this.shardManager = shardManager;
+    this.logger = logger;
     this.joinShardManager = joinShardManager;
   }
 
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  @EventHandler(priority = EventPriority.MONITOR)
   public void on(PlayerJoinEvent e) {
-    System.out.println("Player joined: " + e.getPlayer().getName());
     joinShardManager.joined(e.getPlayer());
     joinShardManager.checkJoin();
+    logger.log(e.getPlayer(), "PLAYER_JOIN");
 
-    Bukkit.getScheduler().runTaskLater(scheduler, () -> {
+    // not necessary
+    /*Bukkit.getScheduler().runTaskLater(scheduler, () -> {
       // identify if we don't have shards yet
       shardManager.sendIdentify(true);
-    }, 2);
+    }, 2);*/
 
   }
   @EventHandler(priority = EventPriority.MONITOR)
   public void on(PlayerQuitEvent e) {
     joinShardManager.left(e.getPlayer());
+    logger.log(e.getPlayer(), "PLAYER_QUIT");
   }
 }

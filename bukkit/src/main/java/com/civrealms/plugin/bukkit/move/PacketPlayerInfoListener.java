@@ -2,7 +2,7 @@ package com.civrealms.plugin.bukkit.move;
 
 import com.civrealms.plugin.bukkit.shard.JoinShardManager;
 import com.civrealms.plugin.common.packet.PacketReceiveEvent;
-import com.civrealms.plugin.common.packets.PacketPlayerInfo;
+import com.civrealms.plugin.common.packets.PacketPlayerTransfer;
 import com.google.common.eventbus.Subscribe;
 
 public class PacketPlayerInfoListener {
@@ -13,11 +13,11 @@ public class PacketPlayerInfoListener {
 
   @Subscribe
   public void on(PacketReceiveEvent event) {
-    if (!(event.getPacket() instanceof PacketPlayerInfo)) {
+    if (!(event.getPacket() instanceof PacketPlayerTransfer)) {
       return;
     }
 
-    PacketPlayerInfo packet = (PacketPlayerInfo) event.getPacket();
+    PacketPlayerTransfer packet = (PacketPlayerTransfer) event.getPacket();
     joinShardManager.addPlayerInfoPacket(packet);
   }
 }

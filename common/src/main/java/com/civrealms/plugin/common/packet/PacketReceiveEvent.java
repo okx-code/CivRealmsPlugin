@@ -2,10 +2,13 @@ package com.civrealms.plugin.common.packet;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @RequiredArgsConstructor
 @Getter
 public class PacketReceiveEvent {
+  @Setter
+  private boolean acknowledged = true;
   private final boolean fromProxy;
   private final String server;
   private final Packet packet;

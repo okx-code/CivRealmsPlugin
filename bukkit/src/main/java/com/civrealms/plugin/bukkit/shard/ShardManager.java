@@ -2,10 +2,11 @@ package com.civrealms.plugin.bukkit.shard;
 
 import com.civrealms.plugin.bukkit.BungeeMessenger;
 import com.civrealms.plugin.bukkit.inventory.GZIPInventorySerializer;
+import com.civrealms.plugin.bukkit.inventory.log.InventoryLogger;
 import com.civrealms.plugin.common.packet.PacketReceiveEvent;
 import com.civrealms.plugin.common.packet.PacketSender;
+import com.civrealms.plugin.common.packets.PacketPlayerTransfer;
 import com.civrealms.plugin.common.packets.PacketRequestShards;
-import com.civrealms.plugin.common.packets.PacketPlayerInfo;
 import com.civrealms.plugin.common.packets.PacketShardInfo;
 import com.civrealms.plugin.common.packets.data.BoatData;
 import com.civrealms.plugin.common.shard.AquaNether;
@@ -14,6 +15,7 @@ import com.google.common.eventbus.Subscribe;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -21,6 +23,7 @@ import org.bukkit.plugin.Plugin;
 
 public class ShardManager {
   private final Plugin scheduler;
+  private final InventoryLogger logger;
   private final String currentShard;
   private final BungeeMessenger messenger;
   private final PacketSender sender;
@@ -30,9 +33,12 @@ public class ShardManager {
   private AquaNether aquaNether;
   private Collection<Shard> shards;
 
-  public ShardManager(Plugin scheduler, String currentShard, BungeeMessenger messenger,
+  public ShardManager(Plugin scheduler,
+      InventoryLogger logger, String currentShard,
+      BungeeMessenger messenger,
       PacketSender sender, LeaveShardManager leaveShardManager) {
     this.scheduler = scheduler;
+    this.logger = logger;
     this.currentShard = currentShard;
     this.messenger = messenger;
     this.sender = sender;
@@ -54,10 +60,14 @@ public class ShardManager {
     this.shardInfo = true;
   }
 
-  public void sendPlayer(Player player, PacketPlayerInfo.TeleportCause cause, BoatData boat, String server) {
+  public void sendPlayer(Player player, PacketPlayerTransfer.TeleportCause cause, BoatData boat, String server, Location loc) {
     Objects.requireNonNull(player);
     Objects.requireNonNull(cause);
     Objects.requireNonNull(server);
+    
+    if (loc == null) {
+      loc = player.getLocation();
+    }
 
     leaveShardManager.setLeaving(player);
 
@@ -67,10 +77,13 @@ public class ShardManager {
     // servers with no players cannot send nor receive plugin messages
     // ^ THIS IS WRONG BUNGEE IS CLEVER IT USES A QUEUE
     // IGNORE THAT GUY WE'RE SENDING IT STRAIGHT TO THE OTHER SERVER!
+    // the guy before me also sucks we're using rabbitmq now. screw bungee's plugin messaging.
 
-    Location loc = player.getLocation();
-    System.out.println("OUT LOC >" + loc);
-    sender.send(server, new PacketPlayerInfo(
+    // TODO possible dupe: players can drop items etc and dupe in the time between when this packet is sent and acknowledgement is received
+    // option 1: prevent players dropping items / moving them in their inventory - Cancel inventorydropevent, inventorypickupevent, and inventoryclickevent
+    // option 2: send the inventory later - potentially issues with bungee still not sending the player fast enough
+
+    sender.send(server, new PacketPlayerTransfer(
         cause,
         boat,
         player.getUniqueId(),
@@ -88,13 +101,17 @@ public class ShardManager {
         player.getSaturation(),
         player.getFoodLevel(),
         player.getInventory().getHeldItemSlot()
-    ));
-
-    // and connect the player
-    messenger.connect(player, server);
-
-    // clear inventory
-    player.getInventory().setContents(new ItemStack[player.getInventory().getContents().length]);
+    ), () -> {
+      // success
+      logger.log(player, cause.name() + "_TO_" + server);
+      // connect the player
+      messenger.connect(player, server);
+      // clear inventory
+      player.getInventory().setContents(new ItemStack[player.getInventory().getContents().length]);
+    }, () -> {
+      // failure :(
+      player.sendMessage(ChatColor.RED + "Failed to connect to server.");
+    });
   }
 
   @Subscribe

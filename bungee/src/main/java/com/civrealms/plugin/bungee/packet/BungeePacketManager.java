@@ -15,25 +15,28 @@ public class BungeePacketManager extends PacketManager {
   }
 
   @Override
-  public void send(String destination, Packet packet) {
+  public void send(String destination, Packet packet, Runnable success, Runnable fail) {
     DataOutputStream out = new DataOutputStream();
     out.writeBoolean(true);
 
     out.writeByteArray(serializePacket(packet));
-    sender.send(destination, out.toByteArray());
+    sender.send(destination, out.toByteArray(), success, fail);
   }
 
   @Override
-  public void sendProxy(Packet packet) {
+  public void sendProxy(Packet packet, Runnable success, Runnable fail) {
     throw new UnsupportedOperationException("Cannot send message from proxy to proxy");
   }
 
   @Override
-  public void receivePacket(byte[] data) {
+  public boolean receivePacket(byte[] data) {
     DataInputStream in = new DataInputStream(data);
     String from = in.readUTF();
 
     Packet packet = deserializePacket(in.readByteArray());
-    bus.post(PacketReceiveEvent.receivedFromBukkit(from, packet));
+    System.out.println("Received packet " + packet.getClass().getSimpleName());
+    PacketReceiveEvent event = PacketReceiveEvent.receivedFromBukkit(from, packet);
+    bus.post(event);
+    return event.isAcknowledged();
   }
 }

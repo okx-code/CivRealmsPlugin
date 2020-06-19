@@ -3,8 +3,8 @@ package com.civrealms.plugin.common.packets;
 import com.civrealms.plugin.common.packet.Packet;
 import com.civrealms.plugin.common.packets.stream.DataInputStream;
 import com.civrealms.plugin.common.packets.stream.DataOutputStream;
-import com.civrealms.plugin.common.shard.CircleShard;
 import com.civrealms.plugin.common.shard.AquaNether;
+import com.civrealms.plugin.common.shard.CircleShard;
 import com.civrealms.plugin.common.shard.Shard;
 import com.civrealms.plugin.common.shard.ShardType;
 import java.util.HashSet;
@@ -78,6 +78,7 @@ public class PacketShardInfo implements Packet {
 
   private AquaNether readAquaNether(DataInputStream in) {
     boolean exists = in.readBoolean();
+    System.out.println("REAd aqua nether. Exists? " + exists);
     if (!exists) {
       return null;
     }
@@ -90,8 +91,9 @@ public class PacketShardInfo implements Packet {
     if (hasOpposite) {
       oppositeServer = in.readUTF();
     }
+    short oceanHeight = in.readShort();
 
-    return new AquaNether(isTop, yTeleport, ySpawn, oppositeServer);
+    return new AquaNether(isTop, yTeleport, ySpawn, oppositeServer, oceanHeight);
   }
 
   private void writeShard(DataOutputStream out, Shard shard) {
@@ -110,6 +112,7 @@ public class PacketShardInfo implements Packet {
   }
 
   private void writeAquaNether(DataOutputStream out, AquaNether aquaNether) {
+    System.out.println("Writing aqua nether " + aquaNether);
     if (aquaNether == null) {
       out.writeBoolean(false);
     } else {
@@ -126,6 +129,7 @@ public class PacketShardInfo implements Packet {
         out.writeBoolean(true);
         out.writeUTF(oppositeServer);
       }
+      out.writeShort(aquaNether.getOceanHeight());
     }
   }
 }

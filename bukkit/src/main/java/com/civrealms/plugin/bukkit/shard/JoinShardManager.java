@@ -4,10 +4,10 @@ import com.civrealms.plugin.bukkit.Tick;
 import com.civrealms.plugin.bukkit.boat.BoatInventoryDao;
 import com.civrealms.plugin.bukkit.inventory.GZIPInventorySerializer;
 import com.civrealms.plugin.bukkit.move.PassengerBoatManager;
-import com.civrealms.plugin.bukkit.respawn.RandomSpawn;
+import com.civrealms.plugin.bukkit.respawn.BukkitRandomSpawn;
 import com.civrealms.plugin.common.packet.PacketReceiveEvent;
-import com.civrealms.plugin.common.packets.PacketPlayerInfo;
-import com.civrealms.plugin.common.packets.PacketPlayerInfo.TeleportCause;
+import com.civrealms.plugin.common.packets.PacketPlayerTransfer;
+import com.civrealms.plugin.common.packets.PacketPlayerTransfer.TeleportCause;
 import com.civrealms.plugin.common.packets.PacketShardInfo;
 import com.civrealms.plugin.common.packets.data.BoatData;
 import com.civrealms.plugin.common.shard.AquaNether;
@@ -25,6 +25,7 @@ import org.bukkit.TreeSpecies;
 import org.bukkit.entity.Boat;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
 
@@ -32,13 +33,13 @@ public class JoinShardManager {
   private final Plugin plugin;
   private final ShardManager shardManager;
   private final BoatInventoryDao dao;
-  private final RandomSpawn randomSpawn;
+  private final BukkitRandomSpawn randomSpawn;
   private final PassengerBoatManager passengerBoatManager = new PassengerBoatManager();
-  private final List<PacketPlayerInfo> joinQueue = new ArrayList<>();
+  private final List<PacketPlayerTransfer> joinQueue = new ArrayList<>();
   private final Map<UUID, Integer> joinTimes = new HashMap<>();
 
   public JoinShardManager(Plugin plugin, ShardManager shardManager,
-      BoatInventoryDao dao, RandomSpawn randomSpawn) {
+      BoatInventoryDao dao, BukkitRandomSpawn randomSpawn) {
     this.plugin = plugin;
     this.shardManager = shardManager;
     this.dao = dao;
@@ -54,9 +55,9 @@ public class JoinShardManager {
   }
 
   public void checkJoin() {
-    Iterator<PacketPlayerInfo> it = joinQueue.iterator();
+    Iterator<PacketPlayerTransfer> it = joinQueue.iterator();
     while (it.hasNext()) {
-      PacketPlayerInfo packet = it.next();
+      PacketPlayerTransfer packet = it.next();
       if (isReady(packet)) {
         handlePacket(packet);
         it.remove();
@@ -74,8 +75,8 @@ public class JoinShardManager {
         return true;
       }
     }
-    for (PacketPlayerInfo packet : joinQueue) {
-      if (packet.getUuid().equals(uuid)) {
+    for (PacketPlayerTransfer packet : joinQueue) {
+      if (packet.getUniqueId().equals(uuid)) {
 //        System.out.println("in join queue");
         return true;
       }
@@ -84,7 +85,7 @@ public class JoinShardManager {
     return false;
   }
 
-  public void addPlayerInfoPacket(PacketPlayerInfo packet) {
+  public void addPlayerInfoPacket(PacketPlayerTransfer packet) {
     if (isReady(packet)) {
       handlePacket(packet);
     } else {
@@ -92,11 +93,11 @@ public class JoinShardManager {
     }
   }
 
-  private boolean isReady(PacketPlayerInfo packet) {
+  private boolean isReady(PacketPlayerTransfer packet) {
     if (!shardManager.hasShardInfo()) {
       return false;
     }
-    Player player = Bukkit.getPlayer(packet.getUuid());
+    Player player = Bukkit.getPlayer(packet.getUniqueId());
     if (player == null) {
       return false;
     }
@@ -112,16 +113,19 @@ public class JoinShardManager {
     Bukkit.getScheduler().runTask(plugin, this::checkJoin);
   }
 
-  private void handlePacket(PacketPlayerInfo packet) {
-    Player player = Bukkit.getPlayer(packet.getUuid());
+  private void handlePacket(PacketPlayerTransfer packet) {
+    Player player = Bukkit.getPlayer(packet.getUniqueId());
     if (player == null) {
-      throw new IllegalArgumentException("Could not find player for UUID " + packet.getUuid());
+      throw new IllegalArgumentException("Could not find player for UUID " + packet.getUniqueId());
     }
 
     TeleportCause cause = packet.getCause();
     System.out.println("GOT DATA >> " + player.getName() + " >> " + cause);
     Location destination = new Location(player.getWorld(), packet.getX(), packet.getY(), packet.getZ(), packet.getYaw(), packet.getPitch());
     if (cause == TeleportCause.TRANSITIVE) {
+      // adjust for ocean height
+      destination.setY(destination.getY() + shardManager.getAquaNether().getOceanHeight());
+
       BoatData boatData = packet.getBoat();
       System.out.println("BOAT DATA IS PASSENGER >> " + (boatData == null ? "null" : boatData.isPassenger()));
       if (boatData == null) {
@@ -179,13 +183,23 @@ public class JoinShardManager {
       getCentreBlock(highestBlock);
       player.teleport(highestBlock);
     } else if (cause == TeleportCause.DEATH) {
-      com.civrealms.plugin.common.Location spawn = randomSpawn.getLocation();
-      Location teleport = new Location(player.getWorld(), spawn.getX(), 0, spawn.getZ());
-      getCentreBlock(teleport);
-      System.out.println(teleport.toString());
-      teleport.setY(player.getWorld().getHighestBlockYAt(teleport));
-      System.out.println(teleport.toString());
-      player.teleport(teleport);
+      if (player.getBedSpawnLocation() != null) {
+        player.teleport(player.getBedSpawnLocation());
+      } else {
+        player.teleport(randomSpawn.getRandomSpawn(player));
+      }
+
+      player.getInventory().setContents(new ItemStack[player.getInventory().getContents().length]);
+      player.setVelocity(new Vector());
+      player.setFallDistance(0);
+      player.setHealth(20);
+      player.setExp(0);
+      player.setLevel(0);
+      player.setExhaustion(0);
+      player.setSaturation(0);
+      player.setFoodLevel(20);
+      player.getInventory().setHeldItemSlot(0);
+      return;
     }
 
     player.getInventory().setContents(new GZIPInventorySerializer().deserialize(packet.getInventorySerial()));
