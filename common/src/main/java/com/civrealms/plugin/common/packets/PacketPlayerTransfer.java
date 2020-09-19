@@ -30,6 +30,7 @@ public class PacketPlayerTransfer implements Packet {
   private float saturation;
   private int food;
   private int hotbar;
+  private int gamemode;
 
   @Override
   public void read(DataInputStream in) {
@@ -59,8 +60,9 @@ public class PacketPlayerTransfer implements Packet {
     levels = in.readInt();
     exhaustion = in.readFloat();
     saturation = in.readFloat();
-    food = in.readInt();
-    hotbar = in.readInt();
+    food = in.readByte();
+    hotbar = in.readByte();
+    gamemode = in.readByte();
   }
 
   @Override
@@ -89,8 +91,9 @@ public class PacketPlayerTransfer implements Packet {
     out.writeInt(levels);
     out.writeFloat(exhaustion);
     out.writeFloat(saturation);
-    out.writeInt(food);
-    out.writeInt(hotbar);
+    out.writeByte(food);
+    out.writeByte(hotbar);
+    out.writeByte(gamemode);
     System.out.println("WRITING " + uniqueId + " >> BOAT " + boat + " >> CAUSE " + cause);
   }
 

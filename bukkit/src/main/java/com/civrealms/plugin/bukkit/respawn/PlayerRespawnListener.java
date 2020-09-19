@@ -29,20 +29,48 @@ public class PlayerRespawnListener implements Listener {
 
   @EventHandler
   public void on(PlayerRespawnEvent e) {
-    if (e.isBedSpawn()) {
-      return;
-    }
-
     AquaNether aquaNether = shardManager.getAquaNether();
+
     Player player = e.getPlayer();
     Location location = player.getLocation();
     String shard = shardManager.getShard(location.getBlockX(), location.getBlockY(), location.getBlockZ());
 
     Bukkit.broadcastMessage(aquaNether.toString());
     if (aquaNether.isTop()) {
+      if (shardManager.getCurrentShard().equals(shardManager.getTransitiveShard())) {
+        // if they die in the ocean, spawn them in the main shard for now
+        shardManager.sendPlayer(player, TeleportCause.DEATH, null, shardManager.getDeathShard(), null);
+        return;
+      }
+
+      // They died on the main island world so just spawn them randomly there
       plugin.getLogger().info("Out die");
-      e.setRespawnLocation(randomSpawn.getRandomSpawn(e.getPlayer()));
+      if (!e.isBedSpawn()) {
+        e.setRespawnLocation(randomSpawn.getRandomSpawn(e.getPlayer()));
+      }
       return;
+    }
+
+    /*
+    When they die in the Aqua Nether: check if they are within the same radius circle of any proper island’s hitbox above (I am including original continent here as an "island") versus if they are under the open ocean:
+      If they are under a proper island above check if they have a bed set in the AN: if that bed is within the same circle as the island boundaries above, spawn them in AN (which will end up being in that bed, but that’s Crimeo’s code taking it from there).
+      If they are under a proper island above, and they either have no bed or have a bed set in the AN but that bed is OUTSIDE the circle of the island above, spawn them in the island above, not in the AN.
+      If they are under the open ocean, check which islands they have ever visited before, and treat them as if they died under the circle of the island that is closest to their current position among the set of islands that they have visited before (as per two subsections immediately above this).
+    */
+
+    // If they die in the AN under the open ocean, treat it like dying in the main shard.
+    if (shard.equals(shardManager.getTransitiveShard())) {
+      shard = shardManager.getDeathShard();
+    }
+
+    if (e.isBedSpawn()) {
+      Location bedLocation = e.getRespawnLocation();
+      String bedShard = shardManager.getShard(bedLocation.getBlockX(), bedLocation.getBlockY(), bedLocation.getBlockZ());
+      if (shard.equals(bedShard)) {
+        // if the bed is in the same "top island shard" location, let them spawn there.
+        return;
+      }
+      // otherwise, let them spawn them in the top shard
     }
 
     plugin.getLogger().info("death");
@@ -50,11 +78,10 @@ public class PlayerRespawnListener implements Listener {
     // if you died in the aqua nether
     // spawn in the overworld
 
-    if (!shard.equals(shardManager.getCurrentShard())) {
-      shardManager.sendPlayer(player, TeleportCause.DEATH, null, shard, null);
-      // set their respawn location to where they died while we wait for bungeecord to transfer the player
-      e.setRespawnLocation(location);
-    }
+    // set their respawn location to where they died while we wait for bungeecord to transfer the player
+    e.setRespawnLocation(location);
+
+    shardManager.sendPlayer(player, TeleportCause.DEATH, null, shard, null);
   }
 
   @EventHandler

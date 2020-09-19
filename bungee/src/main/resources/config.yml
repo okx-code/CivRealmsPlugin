@@ -1,0 +1,25 @@
+shards:
+  server1:
+    centre-x: -3200
+    centre-z: 600
+    radius: 100
+    aqua-nether:
+      y-teleport: 0
+      server: "aqua"
+      ocean-height: 63
+  server2:
+    centre-x: -3600
+    centre-z: 600
+    radius: 100
+    aqua-nether:
+      server: "aqua"
+      ocean-height: 63
+transitive:
+  death-shard: "server1"
+  aqua-nether:
+    server: "aqua"
+    ocean-height: 63
+
+aqua-nether:
+  y-teleport: 253
+  y-spawn: 251

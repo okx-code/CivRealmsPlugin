@@ -9,14 +9,16 @@ import java.util.Set;
 
 public class ShardManager {
   private final String transitiveShard; // the "shard between shards"; the endless ocean
+  private final String deathShard; // the shard you spawn at when you die in the transitive shard
   private final Set<Shard> shards;
   private final Map<String, AquaNether> aquaNetherMap;
   private final PacketSender sender;
 
-  public ShardManager(String transitiveShard, Set<Shard> shards,
+  public ShardManager(String transitiveShard, String deathShard, Set<Shard> shards,
       Map<String, AquaNether> aquaNetherMap,
       PacketSender sender) {
     this.transitiveShard = transitiveShard;
+    this.deathShard = deathShard;
     this.shards = shards;
     this.aquaNetherMap = aquaNetherMap;
     this.sender = sender;
@@ -45,6 +47,9 @@ public class ShardManager {
     return aquaNetherMap.get(server.toLowerCase());
   }
 
+  public String getDeathShard() {
+    return deathShard;
+  }
 
   public Set<Shard> getShards() {
     return shards;

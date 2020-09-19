@@ -29,7 +29,7 @@ public class PacketIdentifyListener {
 
 //    shardManager.identify(server, );
 
-    PacketShardInfo shardInfo = new PacketShardInfo(shardManager.getTransitiveShard(), shardManager.getAquaNether(server), shardManager.getModifiedShards(server));
+    PacketShardInfo shardInfo = new PacketShardInfo(shardManager.getTransitiveShard(), shardManager.getDeathShard(), shardManager.getAquaNether(server), shardManager.getModifiedShards(server));
 
     event.reply(packetManager, shardInfo);
   }

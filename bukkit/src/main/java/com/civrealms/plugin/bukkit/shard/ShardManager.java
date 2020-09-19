@@ -30,6 +30,7 @@ public class ShardManager {
   private final LeaveShardManager leaveShardManager;
   private boolean shardInfo = false;
   private String transitiveShard;
+  private String deathShard;
   private AquaNether aquaNether;
   private Collection<Shard> shards;
 
@@ -55,6 +56,7 @@ public class ShardManager {
 
   private void readShards(PacketShardInfo packet) {
     this.transitiveShard = packet.getTransitiveShard();
+    this.deathShard = packet.getDeathShard();
     this.aquaNether = packet.getAquaNether();
     this.shards = new HashSet<>(packet.getShards());
     this.shardInfo = true;
@@ -64,7 +66,7 @@ public class ShardManager {
     Objects.requireNonNull(player);
     Objects.requireNonNull(cause);
     Objects.requireNonNull(server);
-    
+
     if (loc == null) {
       loc = player.getLocation();
     }
@@ -100,7 +102,8 @@ public class ShardManager {
         player.getExhaustion(),
         player.getSaturation(),
         player.getFoodLevel(),
-        player.getInventory().getHeldItemSlot()
+        player.getInventory().getHeldItemSlot(),
+        player.getGameMode().getValue()
     ), () -> {
       // success
       logger.log(player, cause.name() + "_TO_" + server);
@@ -139,6 +142,10 @@ public class ShardManager {
 
   public String getTransitiveShard() {
     return transitiveShard;
+  }
+
+  public String getDeathShard() {
+    return deathShard;
   }
 
   public String getShard(int x, int y, int z) {

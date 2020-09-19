@@ -18,12 +18,14 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public class PacketShardInfo implements Packet {
   private String transitiveShard;
+  private String deathShard;
   private AquaNether aquaNether;
   private Set<Shard> shards;
 
   @Override
   public void read(DataInputStream in) {
     transitiveShard = in.readUTF();
+    deathShard = in.readUTF();
 
     aquaNether = readAquaNether(in);
 
@@ -40,6 +42,7 @@ public class PacketShardInfo implements Packet {
   @Override
   public void write(DataOutputStream out) {
     out.writeUTF(transitiveShard);
+    out.writeUTF(deathShard);
 
     writeAquaNether(out, aquaNether);
 
