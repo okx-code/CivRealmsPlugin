@@ -7,6 +7,7 @@ import com.civrealms.plugin.bukkit.boat.InventoryOpenListener;
 import com.civrealms.plugin.bukkit.boat.MySqlBoatInventoryDao;
 import com.civrealms.plugin.bukkit.inventory.log.InventoryLogDao;
 import com.civrealms.plugin.bukkit.inventory.log.InventoryLogger;
+import com.civrealms.plugin.bukkit.inventory.log.InventoryRestoreCommand;
 import com.civrealms.plugin.bukkit.inventory.log.MySqlInventoryLogDao;
 import com.civrealms.plugin.bukkit.message.BukkitMessenger;
 import com.civrealms.plugin.bukkit.move.AquaNetherMoveListener;
@@ -69,9 +70,9 @@ public class CivRealmsPlugin extends JavaPlugin {
     this.shardManager = new ShardManager(this, invLogger, shard, new BukkitMessenger(this), packetManager, leaveShard);
     bus.register(shardManager);
 
-    BoatInventoryDao dao = new MySqlBoatInventoryDao("localhost", 3306, "civrealms", "root", "");
+    BoatInventoryDao boatDao = new MySqlBoatInventoryDao("localhost", 3306, "civrealms", "root", "");
 
-    JoinShardManager joinShardManager = new JoinShardManager(this, shardManager, dao, randomSpawn);
+    JoinShardManager joinShardManager = new JoinShardManager(this, shardManager, boatDao, randomSpawn);
     bus.register(joinShardManager);
 
     Bukkit.getScheduler().runTaskTimer(this, new ShardIdentifyScheduler(shardManager), 1, 4000);
@@ -84,11 +85,13 @@ public class CivRealmsPlugin extends JavaPlugin {
     getServer().getPluginManager().registerEvents(new PlayerRespawnListener(this, invLogger, shardManager,
         randomSpawn), this);
 
-    getCommand("boatinventory").setExecutor(new BoatInventoryCommand(dao));
-    getServer().getPluginManager().registerEvents(new BoatInventoryListener(dao), this);
+    getCommand("boatinventory").setExecutor(new BoatInventoryCommand(boatDao));
+    getServer().getPluginManager().registerEvents(new BoatInventoryListener(boatDao), this);
 
     bus.register(new PacketPlayerInfoListener(joinShardManager));
 
     getServer().getPluginManager().registerEvents(new InventoryOpenListener(), this);
+
+    getCommand("restore").setExecutor(new InventoryRestoreCommand(logDao));
   }
 }

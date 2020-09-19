@@ -7,3 +7,11 @@ commands:
   boatinventory:
     aliases: [binv, bi]
     usage: /<command> <page>
+  restore:
+    aliases: [invr]
+    usage: /<command> <id>
+    permission: civrealms.command.restore
+
+permissions:
+  civrealms.command.restore:
+    default: op
