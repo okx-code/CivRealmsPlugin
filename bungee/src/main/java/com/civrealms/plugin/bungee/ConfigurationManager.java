@@ -55,7 +55,7 @@ public class ConfigurationManager {
     File file = getFile(name);
 
     if (!file.exists()) {
-      try (InputStream in = getClass().getResourceAsStream(name)) {
+      try (InputStream in = getClass().getResourceAsStream("/" + name)) {
         Files.copy(in, file.toPath());
       } catch (IOException e) {
         e.printStackTrace();
