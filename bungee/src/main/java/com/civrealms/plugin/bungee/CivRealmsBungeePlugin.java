@@ -46,12 +46,12 @@ public class CivRealmsBungeePlugin extends Plugin {
     for (String key : shardsConfig.getKeys()) {
       Configuration shard = shardsConfig.getSection(key);
       shards.add(new CircleShard(key, shard.getInt("centre-x"), shard.getInt("centre-z"), shard.getInt("radius")));
-      aquaNetherMap.put(key, new AquaNether(true, 0, 256, shard.getString("aqua-nether.server"), shard.getInt("aqua-nether.ocean-height")));
+      aquaNetherMap.put(key, new AquaNether(true, 0, 256, shard.getString("aqua-nether.server"), shard.getInt("aqua-nether.ocean-height", 63)));
     }
 
     Configuration transitiveConfig = cc.getSection("transitive");
     String deathShard = transitiveConfig.getString("death-shard");
-    aquaNetherMap.put("transitive", new AquaNether(true, 0, 256, transitiveConfig.getString("aqua-nether.server"), transitiveConfig.getInt("aqua-nether.ocena-height")));
+    aquaNetherMap.put("transitive", new AquaNether(true, 0, 256, transitiveConfig.getString("aqua-nether.server"), transitiveConfig.getInt("aqua-nether.ocean-height", 63)));
 
     Configuration aquaNetherConfig = cc.getSection("aqua-nether");
     aquaNetherMap.put("aqua", new AquaNether(false, aquaNetherConfig.getInt("y-teleport"), aquaNetherConfig.getInt("y-spawn"), null, 63));
