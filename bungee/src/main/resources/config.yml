@@ -1,6 +1,6 @@
 shards:
   server1:
-    centre-x: -3200
+    centre-x: -3600
     centre-z: 600
     radius: 100
     aqua-nether:
@@ -8,13 +8,14 @@ shards:
       server: "aqua"
       ocean-height: 63
   server2:
-    centre-x: -3600
+    centre-x: -3200
     centre-z: 600
     radius: 100
     aqua-nether:
       server: "aqua"
       ocean-height: 63
 transitive:
+  server: "transitive"
   death-shard: "server1"
   aqua-nether:
     server: "aqua"

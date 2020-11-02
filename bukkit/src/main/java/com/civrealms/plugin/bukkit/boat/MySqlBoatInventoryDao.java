@@ -15,18 +15,18 @@ import org.bukkit.inventory.ItemStack;
 public class MySqlBoatInventoryDao implements BoatInventoryDao {
   private static final InventorySerializer serializer = new GZIPInventorySerializer();
 
-  private static final String CREATE_INVENTORY = "CREATE TABLE IF NOT EXISTS boatinv ("
+  private static final String CREATE_INVENTORY = "CREATE TABLE IF NOT EXISTS nboatinv ("
       + "uuid VARCHAR(36),"
-      + "inventory BLOB,"
+      + "`inventory` BLOB,"
       + "lastPlayer VARCHAR(36),"
       + "x INT,"
       + "y INT,"
       + "z INT,"
       + "PRIMARY KEY (uuid))";
-  private static final String GET_INVENTORY = "SELECT * FROM boatinv WHERE uuid = ?";
-  private static final String SAVE_INVENTORY = "REPLACE INTO boatinv (uuid, inventory, lastPlayer, x, y, z) VALUES (?, ?, ?, ?, ?, ?)";
-  private static final String CHANGE_UUID = "UPDATE boatinv SET uuid = ? WHERE uuid = ?";
-  private static final String DELETE_INVENTORY = "DELETE FROM boatinv WHERE uuid = ?";
+  private static final String GET_INVENTORY = "SELECT * FROM nboatinv WHERE uuid = ?";
+  private static final String SAVE_INVENTORY = "REPLACE INTO nboatinv (uuid, `inventory`, lastPlayer, x, y, z) VALUES (?, ?, ?, ?, ?, ?)";
+  private static final String CHANGE_UUID = "UPDATE nboatinv SET uuid = ? WHERE uuid = ?";
+  private static final String DELETE_INVENTORY = "DELETE FROM nboatinv WHERE uuid = ?";
 
   private final DataSource source;
 

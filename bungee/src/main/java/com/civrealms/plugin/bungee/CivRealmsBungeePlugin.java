@@ -50,13 +50,14 @@ public class CivRealmsBungeePlugin extends Plugin {
     }
 
     Configuration transitiveConfig = cc.getSection("transitive");
+    String transitiveServer = transitiveConfig.getString("server");
     String deathShard = transitiveConfig.getString("death-shard");
-    aquaNetherMap.put("transitive", new AquaNether(true, 0, 256, transitiveConfig.getString("aqua-nether.server"), transitiveConfig.getInt("aqua-nether.ocean-height", 63)));
+    aquaNetherMap.put(transitiveServer, new AquaNether(true, 0, 256, transitiveConfig.getString("aqua-nether.server"), transitiveConfig.getInt("aqua-nether.ocean-height", 63)));
 
     Configuration aquaNetherConfig = cc.getSection("aqua-nether");
     aquaNetherMap.put("aqua", new AquaNether(false, aquaNetherConfig.getInt("y-teleport"), aquaNetherConfig.getInt("y-spawn"), null, 63));
 
-    ShardManager shardManager = new ShardManager("transitive", deathShard, shards, aquaNetherMap, packetManager);
+    ShardManager shardManager = new ShardManager(transitiveServer, deathShard, shards, aquaNetherMap, packetManager);
     bus.register(new PacketIdentifyListener(packetManager, shardManager));
 
 //    getProxy().getPluginManager().registerListener(this, new ProxyMessageListener(destinationManager, packetManager));

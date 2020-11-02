@@ -5,6 +5,7 @@ import com.civrealms.plugin.bukkit.boat.BoatInventoryDao;
 import com.civrealms.plugin.bukkit.boat.BoatInventoryListener;
 import com.civrealms.plugin.bukkit.boat.InventoryOpenListener;
 import com.civrealms.plugin.bukkit.boat.MySqlBoatInventoryDao;
+import com.civrealms.plugin.bukkit.day.DayTickScheduler;
 import com.civrealms.plugin.bukkit.inventory.log.InventoryLogDao;
 import com.civrealms.plugin.bukkit.inventory.log.InventoryLogger;
 import com.civrealms.plugin.bukkit.inventory.log.InventoryRestoreCommand;
@@ -32,6 +33,7 @@ import com.google.common.eventbus.EventBus;
 import com.rabbitmq.client.Channel;
 import java.util.function.Supplier;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class CivRealmsPlugin extends JavaPlugin {
@@ -51,7 +53,14 @@ public class CivRealmsPlugin extends JavaPlugin {
     String shard = getConfig().getString("shard");
 
     // TODO no-op inventory log dao if sql cannot be loaded
-    InventoryLogDao logDao = new MySqlInventoryLogDao("localhost", 3306, "civrealms", "root", "");
+    ConfigurationSection sqlSection = getConfig().getConfigurationSection("sql");
+    String host = sqlSection.getString("host");
+    int port = sqlSection.getInt("port");
+    String database = sqlSection.getString("database");
+    String user = sqlSection.getString("username");
+    String password = sqlSection.getString("password");
+
+    InventoryLogDao logDao = new MySqlInventoryLogDao(host, port, database, user, password);
     InventoryLogger invLogger = new InventoryLogger(this, shard, getLogger(), logDao);
 
     BukkitRandomSpawn randomSpawn = new WrapperBukkitRandomSpawn(new DummyRandomSpawn());
@@ -70,7 +79,7 @@ public class CivRealmsPlugin extends JavaPlugin {
     this.shardManager = new ShardManager(this, invLogger, shard, new BukkitMessenger(this), packetManager, leaveShard);
     bus.register(shardManager);
 
-    BoatInventoryDao boatDao = new MySqlBoatInventoryDao("localhost", 3306, "civrealms", "root", "");
+    BoatInventoryDao boatDao = new MySqlBoatInventoryDao(host, port, database, user, password);
 
     JoinShardManager joinShardManager = new JoinShardManager(this, shardManager, boatDao, randomSpawn);
     bus.register(joinShardManager);
@@ -93,5 +102,7 @@ public class CivRealmsPlugin extends JavaPlugin {
     getServer().getPluginManager().registerEvents(new InventoryOpenListener(), this);
 
     getCommand("restore").setExecutor(new InventoryRestoreCommand(logDao));
+
+    new DayTickScheduler(getConfig().getInt("day-length-ticks")).runTaskTimer(this, 10, 10);
   }
 }

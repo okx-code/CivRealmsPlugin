@@ -1,2 +1,9 @@
 shard: shardname
 day-length-ticks: 1000
+
+sql:
+  host: "localhost"
+  port: 3306
+  username: "root"
+  password: ""
+  database: "civrealms"
