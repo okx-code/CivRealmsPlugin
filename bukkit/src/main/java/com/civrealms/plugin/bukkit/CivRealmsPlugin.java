@@ -17,9 +17,9 @@ import com.civrealms.plugin.bukkit.move.ShardMoveListener;
 import com.civrealms.plugin.bukkit.move.VoidDamageListener;
 import com.civrealms.plugin.bukkit.packet.BukkitPacketManager;
 import com.civrealms.plugin.bukkit.respawn.BukkitRandomSpawn;
-import com.civrealms.plugin.bukkit.respawn.WrapperBukkitRandomSpawn;
 import com.civrealms.plugin.bukkit.respawn.DummyRandomSpawn;
 import com.civrealms.plugin.bukkit.respawn.PlayerRespawnListener;
+import com.civrealms.plugin.bukkit.respawn.WrapperBukkitRandomSpawn;
 import com.civrealms.plugin.bukkit.shard.JoinListener;
 import com.civrealms.plugin.bukkit.shard.JoinShardManager;
 import com.civrealms.plugin.bukkit.shard.LeaveShardManager;
@@ -33,7 +33,9 @@ import com.google.common.eventbus.EventBus;
 import com.rabbitmq.client.Channel;
 import java.util.function.Supplier;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class CivRealmsPlugin extends JavaPlugin {
@@ -42,6 +44,8 @@ public class CivRealmsPlugin extends JavaPlugin {
 
   private ShardManager shardManager;
   private PacketManager packetManager;
+
+  private BukkitRandomSpawn bukkitRandomSpawn;
 
   @Override
   public void onEnable() {
@@ -63,7 +67,7 @@ public class CivRealmsPlugin extends JavaPlugin {
     InventoryLogDao logDao = new MySqlInventoryLogDao(host, port, database, user, password);
     InventoryLogger invLogger = new InventoryLogger(this, shard, getLogger(), logDao);
 
-    BukkitRandomSpawn randomSpawn = new WrapperBukkitRandomSpawn(new DummyRandomSpawn());
+    bukkitRandomSpawn = new WrapperBukkitRandomSpawn(new DummyRandomSpawn());
 
     this.bus = new EventBus();
 
@@ -81,7 +85,7 @@ public class CivRealmsPlugin extends JavaPlugin {
 
     BoatInventoryDao boatDao = new MySqlBoatInventoryDao(host, port, database, user, password);
 
-    JoinShardManager joinShardManager = new JoinShardManager(this, shardManager, boatDao, randomSpawn);
+    JoinShardManager joinShardManager = new JoinShardManager(this, shardManager, boatDao, bukkitRandomSpawn);
     bus.register(joinShardManager);
 
     Bukkit.getScheduler().runTaskTimer(this, new ShardIdentifyScheduler(shardManager), 1, 4000);
@@ -92,7 +96,7 @@ public class CivRealmsPlugin extends JavaPlugin {
     getServer().getPluginManager().registerEvents(leaveShard, this);
     getServer().getPluginManager().registerEvents(new VoidDamageListener(), this);
     getServer().getPluginManager().registerEvents(new PlayerRespawnListener(this, invLogger, shardManager,
-        randomSpawn), this);
+        bukkitRandomSpawn), this);
 
     getCommand("boatinventory").setExecutor(new BoatInventoryCommand(boatDao));
     getServer().getPluginManager().registerEvents(new BoatInventoryListener(boatDao), this);
@@ -104,5 +108,9 @@ public class CivRealmsPlugin extends JavaPlugin {
     getCommand("restore").setExecutor(new InventoryRestoreCommand(logDao));
 
     new DayTickScheduler(getConfig().getInt("day-length-ticks")).runTaskTimer(this, 10, 10);
+  }
+
+  public void randomSpawn(World world, Player player) {
+    player.teleport(bukkitRandomSpawn.getRandomSpawn(world, player));
   }
 }

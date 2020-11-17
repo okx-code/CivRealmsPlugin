@@ -1,6 +1,7 @@
 package com.civrealms.plugin.bukkit.respawn;
 
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 public class WrapperBukkitRandomSpawn implements BukkitRandomSpawn {
@@ -11,9 +12,9 @@ public class WrapperBukkitRandomSpawn implements BukkitRandomSpawn {
   }
 
   @Override
-  public Location getRandomSpawn(Player player) {
+  public Location getRandomSpawn(World world, Player player) {
     com.civrealms.plugin.common.Location location = spawn.getLocation();
-    Location teleport = new Location(player.getWorld(), location.getX() + 0.5, 0, location.getZ() + 0.5);
+    Location teleport = new Location(world, location.getX() + 0.5, 0, location.getZ() + 0.5);
     teleport.setY(player.getWorld().getHighestBlockYAt(teleport));
     return teleport;
   }

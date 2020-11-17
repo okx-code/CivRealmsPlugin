@@ -121,8 +121,8 @@ public class JoinShardManager {
     }
 
     TeleportCause cause = packet.getCause();
-    System.out.println("GOT DATA >> " + player.getName() + " >> " + cause);
     Location destination = new Location(player.getWorld(), packet.getX(), packet.getY(), packet.getZ(), packet.getYaw(), packet.getPitch());
+    System.out.println("GOT DATA >> " + player.getName() + " >> " + cause + " location " + destination + " AN " + shardManager.getAquaNether());
     if (cause == TeleportCause.TRANSITIVE) {
       // adjust for ocean height
       destination.setY(destination.getY() + shardManager.getAquaNether().getOceanHeight());
@@ -142,6 +142,7 @@ public class JoinShardManager {
           System.out.println(">> NO BOAT");
         }
       } else {
+        System.out.println("Destination: " + destination);
         // teleport because sometimes if you're super sneaky (literally) you can teleport
         // to the place you left the shard that you are entering
         player.teleport(destination);
@@ -187,7 +188,7 @@ public class JoinShardManager {
       if (player.getBedSpawnLocation() != null) {
         player.teleport(player.getBedSpawnLocation());
       } else {
-        player.teleport(randomSpawn.getRandomSpawn(player));
+        player.teleport(randomSpawn.getRandomSpawn(player.getWorld(), player));
       }
 
       player.getInventory().setContents(new ItemStack[player.getInventory().getContents().length]);

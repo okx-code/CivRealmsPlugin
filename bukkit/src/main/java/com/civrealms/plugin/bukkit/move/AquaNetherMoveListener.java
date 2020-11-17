@@ -29,13 +29,16 @@ public class AquaNetherMoveListener implements Listener {
       return;
     }
     if (leaveShard.isLeaving(event.getPlayer())) {
+      System.out.println("Player is leaving");
       return;
     }
     if (joinShardManager.isJoining(event.getPlayer().getUniqueId())) {
+      System.out.println("Player is joining");
       return;
     }
     AquaNether nether = shardManager.getAquaNether();
     if (nether == null) {
+      System.out.println("AN is null");
       return;
     }
 
@@ -45,6 +48,7 @@ public class AquaNetherMoveListener implements Listener {
 
     // TODO check if portal exists for anti hacking or something
     if (nether.isTop()) {
+      System.out.println("To: " + nether);
       if (y <= yTeleport && nether.getOppositeServer() != null) {
         teleportToAquaNether(event.getPlayer(), nether.getOppositeServer());
       }

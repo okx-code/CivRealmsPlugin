@@ -44,7 +44,7 @@ public class ShardManager {
   }
 
   public AquaNether getAquaNether(String server) {
-    return aquaNetherMap.get(server.toLowerCase());
+    return aquaNetherMap.get(server);
   }
 
   public String getDeathShard() {
