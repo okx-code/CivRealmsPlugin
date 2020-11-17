@@ -188,7 +188,7 @@ public class JoinShardManager {
       if (player.getBedSpawnLocation() != null) {
         player.teleport(player.getBedSpawnLocation());
       } else {
-        player.teleport(randomSpawn.getRandomSpawn(player.getWorld(), player));
+        player.teleport(randomSpawn.getLocation(player.getWorld()));
       }
 
       player.getInventory().setContents(new ItemStack[player.getInventory().getContents().length]);

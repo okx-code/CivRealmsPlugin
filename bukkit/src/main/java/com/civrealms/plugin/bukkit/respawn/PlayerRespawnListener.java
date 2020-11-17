@@ -46,7 +46,7 @@ public class PlayerRespawnListener implements Listener {
       // They died on the main island world so just spawn them randomly there
       plugin.getLogger().info("Out die");
       if (!e.isBedSpawn()) {
-        e.setRespawnLocation(randomSpawn.getRandomSpawn(e.getPlayer().getWorld(), e.getPlayer()));
+        e.setRespawnLocation(randomSpawn.getLocation(e.getPlayer().getWorld()));
       }
       return;
     }

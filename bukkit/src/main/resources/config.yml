@@ -1,6 +1,11 @@
 shard: shardname
 day-length-ticks: 1000
 
+spawnWidth: 2
+spawnHeight: 2
+centreX: 0
+centreZ: 0
+
 sql:
   host: "localhost"
   port: 3306

@@ -17,9 +17,8 @@ import com.civrealms.plugin.bukkit.move.ShardMoveListener;
 import com.civrealms.plugin.bukkit.move.VoidDamageListener;
 import com.civrealms.plugin.bukkit.packet.BukkitPacketManager;
 import com.civrealms.plugin.bukkit.respawn.BukkitRandomSpawn;
-import com.civrealms.plugin.bukkit.respawn.DummyRandomSpawn;
+import com.civrealms.plugin.bukkit.respawn.CrimeoRandomSpawn;
 import com.civrealms.plugin.bukkit.respawn.PlayerRespawnListener;
-import com.civrealms.plugin.bukkit.respawn.WrapperBukkitRandomSpawn;
 import com.civrealms.plugin.bukkit.shard.JoinListener;
 import com.civrealms.plugin.bukkit.shard.JoinShardManager;
 import com.civrealms.plugin.bukkit.shard.LeaveShardManager;
@@ -67,7 +66,8 @@ public class CivRealmsPlugin extends JavaPlugin {
     InventoryLogDao logDao = new MySqlInventoryLogDao(host, port, database, user, password);
     InventoryLogger invLogger = new InventoryLogger(this, shard, getLogger(), logDao);
 
-    bukkitRandomSpawn = new WrapperBukkitRandomSpawn(new DummyRandomSpawn());
+    bukkitRandomSpawn = new CrimeoRandomSpawn(getConfig().getInt("spawnWidth"), getConfig().getInt("spawnHeight"),
+        getConfig().getInt("centreX"), getConfig().getInt("centreZ"));
 
     this.bus = new EventBus();
 
@@ -111,6 +111,6 @@ public class CivRealmsPlugin extends JavaPlugin {
   }
 
   public void randomSpawn(World world, Player player) {
-    player.teleport(bukkitRandomSpawn.getRandomSpawn(world, player));
+    player.teleport(bukkitRandomSpawn.getLocation(world));
   }
 }
