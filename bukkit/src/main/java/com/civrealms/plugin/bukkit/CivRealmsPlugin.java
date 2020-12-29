@@ -90,13 +90,15 @@ public class CivRealmsPlugin extends JavaPlugin {
 
     Bukkit.getScheduler().runTaskTimer(this, new ShardIdentifyScheduler(shardManager), 1, 4000);
 
-    getServer().getPluginManager().registerEvents(new ShardMoveListener(this, shardManager, leaveShard, joinShardManager), this);
-    getServer().getPluginManager().registerEvents(new JoinListener(invLogger, joinShardManager), this);
-    getServer().getPluginManager().registerEvents(new AquaNetherMoveListener(shardManager, leaveShard, joinShardManager), this);
+    if (!getConfig().getBoolean("disable-shard-teleports")) {
+      getServer().getPluginManager().registerEvents(new JoinListener(invLogger, joinShardManager), this);
+      getServer().getPluginManager().registerEvents(new ShardMoveListener(this, shardManager, leaveShard, joinShardManager), this);
+      getServer().getPluginManager().registerEvents(new AquaNetherMoveListener(shardManager, leaveShard, joinShardManager), this);
+      getServer().getPluginManager().registerEvents(new PlayerRespawnListener(this, invLogger, shardManager,
+          bukkitRandomSpawn), this);
+    }
     getServer().getPluginManager().registerEvents(leaveShard, this);
     getServer().getPluginManager().registerEvents(new VoidDamageListener(), this);
-    getServer().getPluginManager().registerEvents(new PlayerRespawnListener(this, invLogger, shardManager,
-        bukkitRandomSpawn), this);
 
     getCommand("boatinventory").setExecutor(new BoatInventoryCommand(boatDao));
     getServer().getPluginManager().registerEvents(new BoatInventoryListener(boatDao), this);

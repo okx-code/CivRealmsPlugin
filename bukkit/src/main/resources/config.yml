@@ -1,6 +1,8 @@
 shard: shardname
 day-length-ticks: 1000
 
+disable-shard-teleports: false
+
 spawnWidth: 2
 spawnHeight: 2
 centreX: 0
