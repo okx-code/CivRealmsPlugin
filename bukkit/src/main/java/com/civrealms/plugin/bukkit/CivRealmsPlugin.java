@@ -110,6 +110,10 @@ public class CivRealmsPlugin extends JavaPlugin {
     new DayTickScheduler(getConfig().getInt("day-length-ticks")).runTaskTimer(this, 10, 10);
   }
 
+  public ShardManager getShardManager() {
+    return shardManager;
+  }
+
   public void randomSpawn(World world, Player player) {
     player.teleport(bukkitRandomSpawn.getLocation(world));
   }

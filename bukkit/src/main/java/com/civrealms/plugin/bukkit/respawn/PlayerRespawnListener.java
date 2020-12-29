@@ -4,7 +4,6 @@ import com.civrealms.plugin.bukkit.inventory.log.InventoryLogger;
 import com.civrealms.plugin.bukkit.shard.ShardManager;
 import com.civrealms.plugin.common.packets.PacketPlayerTransfer.TeleportCause;
 import com.civrealms.plugin.common.shard.AquaNether;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -35,7 +34,6 @@ public class PlayerRespawnListener implements Listener {
     Location location = player.getLocation();
     String shard = shardManager.getShard(location.getBlockX(), location.getBlockY(), location.getBlockZ());
 
-    Bukkit.broadcastMessage(aquaNether.toString());
     if (aquaNether.isTop()) {
       if (shardManager.getCurrentShard().equals(shardManager.getTransitiveShard())) {
         // if they die in the ocean, spawn them in the main shard for now
