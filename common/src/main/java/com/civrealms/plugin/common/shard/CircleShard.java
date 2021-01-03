@@ -15,8 +15,8 @@ public class CircleShard implements Shard {
 
   @Override
   public boolean contains(int x, int y, int z) {
-    int xDist = Math.abs(centerX - x);
-    int zDist = Math.abs(centerZ - z);
+    long xDist = Math.abs(centerX - x);
+    long zDist = Math.abs(centerZ - z);
 
     double distanceSquared = xDist * xDist + zDist * zDist;
 

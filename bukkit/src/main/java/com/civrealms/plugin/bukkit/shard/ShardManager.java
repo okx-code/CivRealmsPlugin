@@ -15,11 +15,14 @@ import com.google.common.eventbus.Subscribe;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
+import net.minelink.ctplus.CombatTagPlus;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public class ShardManager {
   private final Plugin scheduler;
@@ -66,6 +69,10 @@ public class ShardManager {
     Objects.requireNonNull(player);
     Objects.requireNonNull(cause);
     Objects.requireNonNull(server);
+
+    if (Bukkit.getPluginManager().isPluginEnabled("CombatTagPlus")) {
+      JavaPlugin.getPlugin(CombatTagPlus.class).getTagManager().untag(player.getUniqueId());
+    }
 
     if (loc == null) {
       loc = player.getLocation();

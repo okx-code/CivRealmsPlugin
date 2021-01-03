@@ -71,7 +71,7 @@ public class PlayerRespawnListener implements Listener {
       // otherwise, let them spawn them in the top shard
     }
 
-    plugin.getLogger().info("death");
+    plugin.getLogger().info("death sending to " + shard);
 
     // if you died in the aqua nether
     // spawn in the overworld
