@@ -4,6 +4,8 @@ import com.civrealms.plugin.bukkit.inventory.log.InventoryLogger;
 import com.civrealms.plugin.bukkit.shard.ShardManager;
 import com.civrealms.plugin.common.packets.PacketPlayerTransfer.TeleportCause;
 import com.civrealms.plugin.common.shard.AquaNether;
+import com.devotedmc.ExilePearl.ExilePearlPlugin;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -28,9 +30,14 @@ public class PlayerRespawnListener implements Listener {
 
   @EventHandler
   public void on(PlayerRespawnEvent e) {
+    Player player = e.getPlayer();
+    if (Bukkit.getPluginManager().isPluginEnabled("ExilePearl")
+        && ExilePearlPlugin.getApi().isPlayerExiled(player.getUniqueId())) {
+      return;
+    }
+
     AquaNether aquaNether = shardManager.getAquaNether();
 
-    Player player = e.getPlayer();
     Location location = player.getLocation();
     String shard = shardManager.getShard(location.getBlockX(), location.getBlockY(), location.getBlockZ());
 
