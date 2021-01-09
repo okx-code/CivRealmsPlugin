@@ -88,15 +88,14 @@ public class ShardManager {
     // IGNORE THAT GUY WE'RE SENDING IT STRAIGHT TO THE OTHER SERVER!
     // the guy before me also sucks we're using rabbitmq now. screw bungee's plugin messaging.
 
-    // TODO possible dupe: players can drop items etc and dupe in the time between when this packet is sent and acknowledgement is received
-    // option 1: prevent players dropping items / moving them in their inventory - Cancel inventorydropevent, inventorypickupevent, and inventoryclickevent
-    // option 2: send the inventory later - potentially issues with bungee still not sending the player fast enough
-
+    ItemStack[] contents = player.getInventory().getContents();
+    // clear inventory
+    player.getInventory().setContents(new ItemStack[contents.length]);
     sender.send(server, new PacketPlayerTransfer(
         cause,
         boat,
         player.getUniqueId(),
-        new GZIPInventorySerializer().serialize(player.getInventory().getContents()),
+        new GZIPInventorySerializer().serialize(contents),
         loc.getX(),
         loc.getY(),
         loc.getZ(),
@@ -116,11 +115,12 @@ public class ShardManager {
       logger.log(player, cause.name() + "_TO_" + server);
       // connect the player
       messenger.connect(player, server);
-      // clear inventory
-      player.getInventory().setContents(new ItemStack[player.getInventory().getContents().length]);
     }, () -> {
       // failure :(
       player.sendMessage(ChatColor.RED + "Failed to connect to server.");
+
+      // restore inventory
+      player.getInventory().setContents(contents);
     });
   }
 
