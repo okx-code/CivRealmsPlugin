@@ -2,12 +2,16 @@ package com.civrealms.plugin.bukkit.inventory.log;
 
 import com.civrealms.plugin.common.Location;
 import java.time.Instant;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
+import net.minelink.ctplus.CombatTagPlus;
+import net.minelink.ctplus.compat.api.NpcPlayerHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public class InventoryLogger {
   private final Plugin plugin;
@@ -28,6 +32,19 @@ public class InventoryLogger {
   }
 
   public void log(Player player, String metadata, Consumer<Integer> callback) {
+    UUID uuid;
+    if (Bukkit.getPluginManager().isPluginEnabled("CombatTagPlus")) {
+      NpcPlayerHelper npcPlayerHelper = JavaPlugin.getPlugin(CombatTagPlus.class)
+          .getNpcPlayerHelper();
+      if (npcPlayerHelper.isNpc(player)) {
+        uuid = npcPlayerHelper.getIdentity(player).getId();
+      } else {
+        uuid = player.getUniqueId();
+      }
+    } else {
+      uuid = player.getUniqueId();
+    }
+    metadata = "CT_" + metadata;
     ItemStack[] inventory = player.getInventory().getContents();
     if (isInventoryEmpty(inventory)) {
       logger.info(player.getName() + " (" + metadata + ") snapshot not saved due to empty inventory.");
@@ -36,16 +53,17 @@ public class InventoryLogger {
 
     org.bukkit.Location location = player.getLocation();
     InventoryLog log = new InventoryLog(
-        player.getUniqueId(),
+        uuid,
         Instant.now(),
         server,
         new Location(location.getBlockX(), location.getBlockY(), location.getBlockZ()),
         inventory,
         metadata
     );
+    String metadataFinal = metadata;
     Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
       int id = dao.saveInventoryLog(log);
-      logger.info(player.getName() + " saved inventory snapshot #" + id + " (" + metadata + ")");
+      logger.info(player.getName() + " saved inventory snapshot #" + id + " (" + metadataFinal + ")");
       if (callback != null) {
         callback.accept(id);
       }

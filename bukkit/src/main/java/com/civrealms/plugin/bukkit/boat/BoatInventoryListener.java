@@ -32,7 +32,7 @@ public class BoatInventoryListener implements Listener {
     spillBoat((Boat) e.getVehicle());
   }
 
-  @EventHandler(priority = EventPriority.HIGHEST)
+//  @EventHandler(priority = EventPriority.HIGHEST)
   public void onBoatMove(VehicleMoveEvent e) {
     if (!(e.getVehicle() instanceof Boat)) {
       return;
