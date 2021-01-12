@@ -21,7 +21,7 @@ public class JoinListener implements Listener {
   public void on(PlayerJoinEvent e) {
     joinShardManager.joined(e.getPlayer());
     joinShardManager.checkJoin();
-    logger.log(e.getPlayer(), "PLAYER_JOIN");
+    logger.log(e.getPlayer(), e.getPlayer().getInventory().getContents(), "PLAYER_JOIN");
 
     // not necessary
     /*Bukkit.getScheduler().runTaskLater(scheduler, () -> {
@@ -33,6 +33,6 @@ public class JoinListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void on(PlayerQuitEvent e) {
     joinShardManager.left(e.getPlayer());
-    logger.log(e.getPlayer(), "PLAYER_QUIT");
+    logger.log(e.getPlayer(), e.getPlayer().getInventory().getContents(), "PLAYER_QUIT");
   }
 }

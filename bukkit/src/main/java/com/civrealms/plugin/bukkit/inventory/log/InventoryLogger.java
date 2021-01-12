@@ -27,11 +27,11 @@ public class InventoryLogger {
     this.dao = dao;
   }
 
-  public void log(Player player, String metadata) {
-    log(player, metadata, null);
+  public void log(Player player, ItemStack[] inventory, String metadata) {
+    log(player, inventory, metadata, null);
   }
 
-  public void log(Player player, String metadata, Consumer<Integer> callback) {
+  public void log(Player player, ItemStack[] inventory, String metadata, Consumer<Integer> callback) {
     UUID uuid;
     if (Bukkit.getPluginManager().isPluginEnabled("CombatTagPlus")) {
       NpcPlayerHelper npcPlayerHelper = JavaPlugin.getPlugin(CombatTagPlus.class)
@@ -45,7 +45,6 @@ public class InventoryLogger {
       uuid = player.getUniqueId();
     }
     metadata = "CT_" + metadata;
-    ItemStack[] inventory = player.getInventory().getContents();
     if (isInventoryEmpty(inventory)) {
       logger.info(player.getName() + " (" + metadata + ") snapshot not saved due to empty inventory.");
       return;

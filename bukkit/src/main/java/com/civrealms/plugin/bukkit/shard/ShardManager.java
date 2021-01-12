@@ -112,7 +112,7 @@ public class ShardManager {
         player.getGameMode().getValue()
     ), () -> {
       // success
-      logger.log(player, cause.name() + "_TO_" + server);
+      logger.log(player, contents, cause.name() + "_TO_" + server);
       // connect the player
       messenger.connect(player, server);
     }, () -> {

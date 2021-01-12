@@ -91,7 +91,7 @@ public class PlayerRespawnListener implements Listener {
 
   @EventHandler
   public void on(PlayerDeathEvent e) {
-    invLogger.log(e.getEntity(), "PLAYER_DEATH");
+    invLogger.log(e.getEntity(), e.getEntity().getInventory().getContents(), "PLAYER_DEATH");
   }
 }
 /*
