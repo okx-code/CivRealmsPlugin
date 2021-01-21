@@ -13,11 +13,14 @@ public class CrimeoRandomSpawn implements BukkitRandomSpawn {
   private final int centreX;
   private final int centreZ;
 
-  public CrimeoRandomSpawn(int spawnWidth, int spawnHeight, int centreX, int centreZ) {
+  private final World world;
+
+  public CrimeoRandomSpawn(int spawnWidth, int spawnHeight, int centreX, int centreZ, World world) {
     this.spawnWidth = spawnWidth;
     this.spawnHeight = spawnHeight;
     this.centreX = centreX;
     this.centreZ = centreZ;
+    this.world = world;
   }
 
   @Override
@@ -36,7 +39,7 @@ public class CrimeoRandomSpawn implements BukkitRandomSpawn {
       highestBlock = getHighestCustomForRespawn(xspwn, zspwn, w);
     }
     int highestBlockY = highestBlock.getY();
-    return new Location(w, xspwn+0.5, highestBlockY+1, zspwn+0.5);
+    return new Location(world == null ? w : world, xspwn+0.5, highestBlockY+1, zspwn+0.5);
   }
 
   public static Block getHighestCustomForRespawn(int x, int z, World w){

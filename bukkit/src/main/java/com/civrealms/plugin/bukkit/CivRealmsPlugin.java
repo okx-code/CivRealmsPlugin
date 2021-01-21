@@ -67,7 +67,7 @@ public class CivRealmsPlugin extends JavaPlugin {
     InventoryLogger invLogger = new InventoryLogger(this, shard, getLogger(), logDao);
 
     bukkitRandomSpawn = new CrimeoRandomSpawn(getConfig().getInt("spawnWidth"), getConfig().getInt("spawnHeight"),
-        getConfig().getInt("centreX"), getConfig().getInt("centreZ"));
+        getConfig().getInt("centreX"), getConfig().getInt("centreZ"), Bukkit.getWorld(getConfig().getString("world")));
 
     this.bus = new EventBus();
 
