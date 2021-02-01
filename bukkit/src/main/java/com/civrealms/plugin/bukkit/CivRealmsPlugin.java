@@ -24,13 +24,19 @@ import com.civrealms.plugin.bukkit.shard.JoinShardManager;
 import com.civrealms.plugin.bukkit.shard.LeaveShardManager;
 import com.civrealms.plugin.bukkit.shard.ShardIdentifyScheduler;
 import com.civrealms.plugin.bukkit.shard.ShardManager;
+import com.civrealms.plugin.bukkit.snitch.StaminaSuperSnitchHandler;
+import com.civrealms.plugin.bukkit.stamina.StaminaDao;
 import com.civrealms.plugin.common.packet.PacketManager;
 import com.civrealms.plugin.common.rabbit.RabbitClient;
 import com.civrealms.plugin.common.rabbit.RabbitPacketListener;
 import com.civrealms.plugin.common.rabbit.RabbitSender;
 import com.google.common.eventbus.EventBus;
 import com.rabbitmq.client.Channel;
+import com.untamedears.JukeAlert.JukeAlert;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import java.util.function.Supplier;
+import javax.sql.DataSource;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
@@ -63,7 +69,14 @@ public class CivRealmsPlugin extends JavaPlugin {
     String user = sqlSection.getString("username");
     String password = sqlSection.getString("password");
 
-    InventoryLogDao logDao = new MySqlInventoryLogDao(host, port, database, user, password);
+    HikariConfig config = new HikariConfig();
+    config.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + database);
+    config.setUsername(user);
+    config.setPassword(password);
+
+    DataSource source = new HikariDataSource(config);
+
+    InventoryLogDao logDao = new MySqlInventoryLogDao(source);
     InventoryLogger invLogger = new InventoryLogger(this, shard, getLogger(), logDao);
 
     bukkitRandomSpawn = new CrimeoRandomSpawn(getConfig().getInt("spawnWidth"), getConfig().getInt("spawnHeight"),
@@ -83,7 +96,7 @@ public class CivRealmsPlugin extends JavaPlugin {
     this.shardManager = new ShardManager(this, invLogger, shard, new BukkitMessenger(this), packetManager, leaveShard);
     bus.register(shardManager);
 
-    BoatInventoryDao boatDao = new MySqlBoatInventoryDao(host, port, database, user, password);
+    BoatInventoryDao boatDao = new MySqlBoatInventoryDao(source);
 
     JoinShardManager joinShardManager = new JoinShardManager(this, shardManager, boatDao, bukkitRandomSpawn);
     bus.register(joinShardManager);
@@ -110,6 +123,11 @@ public class CivRealmsPlugin extends JavaPlugin {
     getCommand("restore").setExecutor(new InventoryRestoreCommand(logDao));
 
     new DayTickScheduler(getConfig().getInt("day-length-ticks")).runTaskTimer(this, 10, 10);
+
+    if (Bukkit.getPluginManager().isPluginEnabled("JukeAlert")) {
+      getLogger().info("Loading JukeAlert super snitch integration");
+      JukeAlert.getInstance().setSuperSnitchHandler(new StaminaSuperSnitchHandler(this, new StaminaDao(source)));
+    }
   }
 
   public ShardManager getShardManager() {

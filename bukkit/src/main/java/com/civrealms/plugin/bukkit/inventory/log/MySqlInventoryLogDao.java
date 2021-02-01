@@ -2,8 +2,6 @@ package com.civrealms.plugin.bukkit.inventory.log;
 
 import com.civrealms.plugin.bukkit.inventory.GZIPInventorySerializer;
 import com.civrealms.plugin.common.Location;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -34,13 +32,8 @@ public class MySqlInventoryLogDao implements InventoryLogDao {
 
   private final DataSource source;
 
-  public MySqlInventoryLogDao(String host, int port, String database, String username, String password) {
-    HikariConfig config = new HikariConfig();
-    config.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + database);
-    config.setUsername(username);
-    config.setPassword(password);
-
-    source = new HikariDataSource(config);
+  public MySqlInventoryLogDao(DataSource source) {
+    this.source = source;
     init();
   }
 

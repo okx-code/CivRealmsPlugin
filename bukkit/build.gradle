@@ -16,6 +16,10 @@ dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
     compileOnly 'net.minelink:CombatTagPlus:1.3.2-SNAPSHOT'
     compileOnly 'com.devotedmc:ExilePearl:1.0.0-SNAPSHOT'
+    compileOnly 'com.untamedears:JukeAlert:1.6.5'
+    compileOnly ('vg.civcraft.mc.civmodcore:CivModCore:1.6.0') {
+        exclude group: '*'
+    }
 }
 
 processResources {

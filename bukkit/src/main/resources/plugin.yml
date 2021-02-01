@@ -2,7 +2,7 @@ name: ${name}
 version: ${version}
 main: com.civrealms.plugin.bukkit.CivRealmsPlugin
 author: Okx
-softdepend: [CombatTagPlus, ExilePearl]
+softdepend: [CombatTagPlus, ExilePearl, JukeAlert]
 
 commands:
   boatinventory:

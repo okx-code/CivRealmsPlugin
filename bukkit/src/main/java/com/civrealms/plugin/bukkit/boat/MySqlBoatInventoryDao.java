@@ -2,8 +2,6 @@ package com.civrealms.plugin.bukkit.boat;
 
 import com.civrealms.plugin.bukkit.inventory.GZIPInventorySerializer;
 import com.civrealms.plugin.bukkit.inventory.InventorySerializer;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -30,13 +28,8 @@ public class MySqlBoatInventoryDao implements BoatInventoryDao {
 
   private final DataSource source;
 
-  public MySqlBoatInventoryDao(String host, int port, String database, String username, String password) {
-    HikariConfig config = new HikariConfig();
-    config.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + database);
-    config.setUsername(username);
-    config.setPassword(password);
-
-    source = new HikariDataSource(config);
+  public MySqlBoatInventoryDao(DataSource source) {
+    this.source = source;
     init();
   }
 
